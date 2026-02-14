@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Underdark — Act 1</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; background:#000; touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+canvas { display:block; width:100%; height:100%; image-rendering:pixelated; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+'use strict';
+
+// ── CONFIG ──
+const TILE = 32;
+const SPEED = 2.2;
+const ANIM_SPEED = 0.12;
+const INTERACT_DIST = 38;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+let W, H, scale = 1;
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W; canvas.height = H;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ── COLORS ──
+const C = {
+  grass: '#5a9e4b', grassDark: '#3d7a35', path: '#c4a96a', pathEdge: '#a88c4a',
+  water: '#4a90c4', waterDeep: '#3670a0',
+  wallLight: '#e8dcc8', wallDark: '#b8a888', roof: '#c45050', roofDark: '#963838',
+  door: '#8b6b3e', window: '#87ceeb', windowFrame: '#6b5030',
+  tree: '#2d6e1e', treeDark: '#1a5010', trunk: '#8b6b3e',
+  deadTree: '#5a4a3a', deadLeaf: '#6e5a3a',
+  rock: '#888', rockDark: '#666',
+  fence: '#c8b080',
+  glow: '#a060ff',
+  fogColor: 'rgba(20,15,30,',
+  sakura: '#ffb7c5',
+};
+
+// ── CHARACTERS ──
+const CHARS = {
+  hikaru: { name:'Hikaru', hair:'#4488ff', hairStyle:'spiky', skin:'#fce4c8', shirt:'#fff', pants:'#334', eyes:'#2255cc' },
+  rina:   { name:'Rina',   hair:'#ff6eb4', hairStyle:'long',  skin:'#fce4c8', shirt:'#ff8fa0', pants:'#446', eyes:'#cc3366' },
+  kenji:  { name:'Kenji',  hair:'#ff8833', hairStyle:'short', skin:'#f0d0a0', shirt:'#33aa55', pants:'#334', eyes:'#886622' },
+  glen:   { name:'Glen',   hair:'#33cc66', hairStyle:'messy', skin:'#fce4c8', shirt:'#667', pants:'#334', eyes:'#228844' },
+  officer:{ name:'Officer Tanaka', hair:'#334', hairStyle:'short', skin:'#f0d0a0', shirt:'#2244aa', pants:'#223', eyes:'#332' },
+  shopkeeper:{ name:'Mrs. Yamada', hair:'#996', hairStyle:'bun', skin:'#f0d0a0', shirt:'#aa6633', pants:'#556', eyes:'#553' },
+};
+
+// ── GAME STATE ──
+let gameState = 'title'; // title, playing, dialogue, transition, ending
+let storyFlags = {};
+let currentMap = 'neighborhood';
+let objective = 'Talk to your friends';
+let transitionAlpha = 0;
+let transitionTarget = null;
+let transitionSpawn = null;
+let endingTimer = 0;
+
+// ── PLAYER ──
+let player = { x: 5*TILE, y: 8*TILE, dir: 0, frame: 0, animTimer: 0, moving: false, char: CHARS.hikaru };
+
+// ── CAMERA ──
+let cam = { x: 0, y: 0 };
+
+// ── INPUT ──
+let joystick = { active: false, id: null, sx: 0, sy: 0, cx: 0, cy: 0, dx: 0, dy: 0 };
+let actionBtn = { active: false, pressed: false, id: null };
+let tapAction = false;
+
+function handleTouchStart(e) {
+  e.preventDefault();
+  for (let t of e.changedTouches) {
+    const x = t.clientX, y = t.clientY;
+    if (gameState === 'title') { gameState = 'playing'; return; }
+    if (gameState === 'ending') return;
+    if (gameState === 'dialogue') { tapAction = true; return; }
+    if (x < W * 0.5) {
+      if (!joystick.active) {
+        joystick.active = true; joystick.id = t.identifier;
+        joystick.sx = x; joystick.sy = y; joystick.cx = x; joystick.cy = y;
+      }
+    } else {
+      actionBtn.active = true; actionBtn.pressed = true; actionBtn.id = t.identifier;
+    }
+  }
+}
+function handleTouchMove(e) {
+  e.preventDefault();
+  for (let t of e.changedTouches) {
+    if (t.identifier === joystick.id) {
+      joystick.cx = t.clientX; joystick.cy = t.clientY;
+      let dx = joystick.cx - joystick.sx, dy = joystick.cy - joystick.sy;
+      let dist = Math.sqrt(dx*dx + dy*dy);
+      let maxR = 50;
+      if (dist > maxR) { dx = dx/dist*maxR; dy = dy/dist*maxR; }
+      joystick.dx = dx / maxR; joystick.dy = dy / maxR;
+    }
+  }
+}
+function handleTouchEnd(e) {
+  e.preventDefault();
+  for (let t of e.changedTouches) {
+    if (t.identifier === joystick.id) {
+      joystick.active = false; joystick.id = null;
+      joystick.dx = 0; joystick.dy = 0;
+    }
+    if (t.identifier === actionBtn.id) {
+      actionBtn.active = false; actionBtn.id = null;
+    }
+  }
+}
+canvas.addEventListener('touchstart', handleTouchStart, {passive:false});
+canvas.addEventListener('touchmove', handleTouchMove, {passive:false});
+canvas.addEventListener('touchend', handleTouchEnd, {passive:false});
+canvas.addEventListener('touchcancel', handleTouchEnd, {passive:false});
+
+// Keyboard fallback
+let keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (gameState === 'title') gameState = 'playing';
+  if (gameState === 'dialogue' && (e.key === ' ' || e.key === 'Enter')) tapAction = true;
+  if (e.key === ' ' || e.key === 'e' || e.key === 'Enter') actionBtn.pressed = true;
+});
+window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+// ── TILE TYPES ──
+const T = {
+  GRASS: 0, PATH: 1, WALL: 2, ROOF: 3, DOOR: 4, WATER: 5,
+  TREE: 6, ROCK: 7, FENCE: 8, DARK_GRASS: 9, DEAD_TREE: 10,
+  PORTAL: 11, FLOOR: 12, WINDOW_WALL: 13, BUSH: 14,
+  FLOWER: 15, BRIDGE: 16, SIGN: 17, LAMP: 18
+};
+const WALKABLE = new Set([T.GRASS, T.PATH, T.DOOR, T.DARK_GRASS, T.PORTAL, T.FLOOR, T.BRIDGE, T.FLOWER]);
+
+// ── MAPS ──
+const MAPS = {};
+
+MAPS.neighborhood = {
+  w: 30, h: 22,
+  tiles: buildMap_neighborhood(),
+  npcs: [
+    { id:'rina', x:12*TILE, y:10*TILE, char:CHARS.rina, dir:0,
+      dialogue: () => {
+        if (storyFlags.talkedRina) return [
+          {who:'rina', text:"We should check the town center. Maybe someone saw Glen."},
+        ];
+        storyFlags.talkedRina = true;
+        checkAllTalked();
+        return [
+          {who:'rina', text:"Hikaru! Have you heard? Glen has been missing for three days now..."},
+          {who:'hikaru', text:"I know. The police said they couldn't find any traces."},
+          {who:'rina', text:"They barely even tried! We have to do something ourselves."},
+          {who:'hikaru', text:"You're right. Let's gather the group and investigate."},
+        ];
+      }
+    },
+    { id:'kenji', x:18*TILE, y:7*TILE, char:CHARS.kenji, dir:2,
+      dialogue: () => {
+        if (storyFlags.talkedKenji) return [
+          {who:'kenji', text:"I'll check around here some more. You guys go to town."},
+        ];
+        storyFlags.talkedKenji = true;
+        checkAllTalked();
+        return [
+          {who:'kenji', text:"Yo, Hikaru. This is messed up. Glen wouldn't just vanish like that."},
+          {who:'hikaru', text:"Did he say anything to you before he disappeared?"},
+          {who:'kenji', text:"Last thing he told me was he found some 'interesting place' near the old forest..."},
+          {who:'kenji', text:"I didn't think much of it then. But now..."},
+          {who:'hikaru', text:"The old forest? That's worth investigating."},
+        ];
+      }
+    },
+  ],
+  exits: [
+    { x:29, y:10, targetMap:'town', spawnX:1*TILE, spawnY:10*TILE, condition: () => storyFlags.canGoTown },
+    { x:29, y:11, targetMap:'town', spawnX:1*TILE, spawnY:11*TILE, condition: () => storyFlags.canGoTown },
+  ],
+  particles: 'sakura',
+};
+
+MAPS.town = {
+  w: 32, h: 20,
+  tiles: buildMap_town(),
+  npcs: [
+    { id:'officer', x:22*TILE, y:6*TILE, char:CHARS.officer, dir:2,
+      dialogue: () => {
+        if (storyFlags.talkedOfficer) return [
+          {who:'officer', text:"I already told you, we've done everything we can. Go home, kids."},
+        ];
+        storyFlags.talkedOfficer = true;
+        checkTownDone();
+        return [
+          {who:'hikaru', text:"Officer, about our friend Glen who went missing..."},
+          {who:'officer', text:"Ah, the Tanaka boy. Look, we searched the area thoroughly."},
+          {who:'officer', text:"No signs of foul play. He probably just ran away from home. It happens."},
+          {who:'rina', text:"That's not like Glen at all! He wouldn't just leave!"},
+          {who:'officer', text:"I understand your concern, but there's nothing more we can do."},
+          {who:'hikaru', text:"(The police are useless... We'll have to find him ourselves.)"},
+        ];
+      }
+    },
+    { id:'shopkeeper', x:10*TILE, y:12*TILE, char:CHARS.shopkeeper, dir:0,
+      dialogue: () => {
+        if (storyFlags.talkedShop) return [
+          {who:'shopkeeper', text:"Please be careful near that forest. Strange things happen there at night."},
+        ];
+        storyFlags.talkedShop = true;
+        checkTownDone();
+        return [
+          {who:'hikaru', text:"Excuse me, have you seen a boy with green hair around here recently?"},
+          {who:'shopkeeper', text:"Green hair? Oh my... yes, I think I saw someone like that."},
+          {who:'shopkeeper', text:"It was late at night, about three days ago. He was heading toward the old forest path."},
+          {who:'hikaru', text:"The old forest! That's what Kenji mentioned too!"},
+          {who:'shopkeeper', text:"You're not thinking of going there, are you? That place gives me the creeps."},
+          {who:'shopkeeper', text:"People say they hear strange sounds coming from deep in those woods..."},
+          {who:'hikaru', text:"We have to find our friend. Thank you for the information!"},
+        ];
+      }
+    },
+  ],
+  exits: [
+    { x:0, y:10, targetMap:'neighborhood', spawnX:28*TILE, spawnY:10*TILE },
+    { x:0, y:11, targetMap:'neighborhood', spawnX:28*TILE, spawnY:11*TILE },
+    { x:31, y:9, targetMap:'forest', spawnX:1*TILE, spawnY:10*TILE, condition: () => storyFlags.canGoForest },
+    { x:31, y:10, targetMap:'forest', spawnX:1*TILE, spawnY:11*TILE, condition: () => storyFlags.canGoForest },
+  ],
+  particles: null,
+};
+
+MAPS.forest = {
+  w: 35, h: 24,
+  tiles: buildMap_forest(),
+  npcs: [
+    { id:'backpack', x:20*TILE, y:12*TILE, char:null, isObject:true, sprite:'backpack',
+      dialogue: () => {
+        if (storyFlags.foundBackpack) return [
+          {who:null, text:"Glen's backpack... He was definitely here."},
+        ];
+        storyFlags.foundBackpack = true;
+        objective = 'Find the source of the strange light';
+        return [
+          {who:null, text:"You found a backpack on the ground."},
+          {who:'hikaru', text:"Wait... this is Glen's backpack!"},
+          {who:'rina', text:"Oh no... He was here. But where did he go?"},
+          {who:'kenji', text:"Look, there's a faint trail leading deeper into the forest..."},
+          {who:'hikaru', text:"And... do you see that? There's a strange light coming from further in."},
+          {who:'rina', text:"I don't see anything..."},
+          {who:'hikaru', text:"(Am I the only one who can see it? Something feels very wrong...)"},
+        ];
+      }
+    },
+    { id:'portal', x:30*TILE, y:5*TILE, char:null, isObject:true, sprite:'portal',
+      dialogue: () => {
+        if (!storyFlags.foundBackpack) return [
+          {who:'hikaru', text:"There's something strange about this area... Let me look around more first."},
+        ];
+        storyFlags.reachedPortal = true;
+        return [
+          {who:null, text:"A swirling void of purple energy pulses before you."},
+          {who:'hikaru', text:"What... what is this?!"},
+          {who:'rina', text:"Hikaru, what are you staring at? I just see old trees..."},
+          {who:'kenji', text:"Yeah man, there's nothing there."},
+          {who:'hikaru', text:"You can't see it?! There's a massive portal right here!"},
+          {who:'hikaru', text:"Glen must have gone through here. I... I can feel it."},
+          {who:'rina', text:"Hikaru, you're scaring me..."},
+          {who:'hikaru', text:"I'm going in. Glen needs our help."},
+          {who:'kenji', text:"If you're going, we're going with you. We're not leaving anyone behind."},
+          {who:null, text:"The three of you step forward into the unknown..."},
+          {who:null, text:"__ENDING__"},
+        ];
+      }
+    },
+  ],
+  exits: [
+    { x:0, y:10, targetMap:'town', spawnX:30*TILE, spawnY:9*TILE },
+    { x:0, y:11, targetMap:'town', spawnX:30*TILE, spawnY:10*TILE },
+  ],
+  particles: 'fog',
+  darkness: 0.3,
+};
+
+function checkAllTalked() {
+  if (storyFlags.talkedRina && storyFlags.talkedKenji) {
+    storyFlags.canGoTown = true;
+    objective = 'Head east to the town center →';
+  }
+}
+function checkTownDone() {
+  if (storyFlags.talkedOfficer && storyFlags.talkedShop) {
+    storyFlags.canGoForest = true;
+    objective = 'Follow the clue to the old forest →';
+  }
+}
+
+// ── MAP BUILDERS ──
+function buildMap_neighborhood() {
+  const m = [];
+  for (let y = 0; y < 22; y++) {
+    m[y] = [];
+    for (let x = 0; x < 30; x++) {
+      // Default: grass
+      let t = T.GRASS;
+      // Paths
+      if (y >= 10 && y <= 11 && x >= 0) t = T.PATH;
+      if (x >= 8 && x <= 9 && y >= 4 && y <= 10) t = T.PATH;
+      if (x >= 16 && x <= 17 && y >= 4 && y <= 10) t = T.PATH;
+      // Flowers along paths
+      if ((y === 9 || y === 12) && x % 3 === 0 && t === T.GRASS) t = T.FLOWER;
+      // Hikaru's house
+      if (x >= 3 && x <= 7 && y >= 3 && y <= 5) t = T.WALL;
+      if (x >= 3 && x <= 7 && y === 2) t = T.ROOF;
+      if (x === 5 && y === 5) t = T.DOOR;
+      if ((x === 4 || x === 6) && y === 4) t = T.WINDOW_WALL;
+      // Rina's house
+      if (x >= 11 && x <= 14 && y >= 4 && y <= 6) t = T.WALL;
+      if (x >= 11 && x <= 14 && y === 3) t = T.ROOF;
+      if (x === 12 && y === 6) t = T.DOOR;
+      if (x === 13 && y === 5) t = T.WINDOW_WALL;
+      // Kenji's house
+      if (x >= 16 && x <= 20 && y >= 2 && y <= 4) t = T.WALL;
+      if (x >= 16 && x <= 20 && y === 1) t = T.ROOF;
+      if (x === 18 && y === 4) t = T.DOOR;
+      if ((x === 17 || x === 19) && y === 3) t = T.WINDOW_WALL;
+      // Trees border
+      if (y === 0 && !(x >= 16 && x <= 20)) t = T.TREE;
+      if (y === 21) t = T.TREE;
+      if (x === 0) t = T.TREE;
+      // Water pond
+      if (x >= 22 && x <= 25 && y >= 14 && y <= 17) t = T.WATER;
+      if (x === 22 && y === 14) t = T.GRASS;
+      if (x === 25 && y === 14) t = T.GRASS;
+      if (x === 22 && y === 17) t = T.GRASS;
+      if (x === 25 && y === 17) t = T.GRASS;
+      // Scattered trees
+      if ((x === 2 && y === 14) || (x === 6 && y === 17) || (x === 10 && y === 16) ||
+          (x === 14 && y === 19) || (x === 26 && y === 3) || (x === 28 && y === 7) ||
+          (x === 3 && y === 19) || (x === 22 && y === 8) || (x === 27 && y === 19)) t = T.TREE;
+      // Lamp posts
+      if ((x === 8 && y === 9) || (x === 16 && y === 9) || (x === 24 && y === 9)) t = T.LAMP;
+      // Fence near pond
+      if (y === 13 && x >= 21 && x <= 26) t = T.FENCE;
+      // Sign
+      if (x === 28 && y === 10) t = T.SIGN;
+      // Right edge exit
+      if (x === 29 && y !== 10 && y !== 11) t = T.FENCE;
+      m[y][x] = t;
+    }
+  }
+  return m;
+}
+
+function buildMap_town() {
+  const m = [];
+  for (let y = 0; y < 20; y++) {
+    m[y] = [];
+    for (let x = 0; x < 32; x++) {
+      let t = T.PATH;
+      // Green park area
+      if (x >= 5 && x <= 15 && y >= 13 && y <= 18) t = T.GRASS;
+      if (x >= 7 && x <= 13 && y >= 14 && y <= 17) t = T.FLOWER;
+      if ((x === 5 || x === 15) && y >= 13 && y <= 18) t = T.TREE;
+      if (y === 13 && x >= 5 && x <= 15) t = T.FENCE;
+      if (x === 10 && y === 13) t = T.PATH; // park entrance
+      // Main road
+      if (y >= 9 && y <= 12) t = T.PATH;
+      // Police station
+      if (x >= 19 && x <= 25 && y >= 2 && y <= 5) t = T.WALL;
+      if (x >= 19 && x <= 25 && y === 1) t = T.ROOF;
+      if (x === 22 && y === 5) t = T.DOOR;
+      if ((x === 20 || x === 24) && y === 4) t = T.WINDOW_WALL;
+      if ((x === 21 || x === 23) && y === 4) t = T.WINDOW_WALL;
+      // Shop
+      if (x >= 7 && x <= 12 && y >= 4 && y <= 7) t = T.WALL;
+      if (x >= 7 && x <= 12 && y === 3) t = T.ROOF;
+      if (x === 10 && y === 7) t = T.DOOR;
+      if ((x === 8 || x === 11) && y === 6) t = T.WINDOW_WALL;
+      // Houses
+      if (x >= 2 && x <= 5 && y >= 4 && y <= 6) t = T.WALL;
+      if (x >= 2 && x <= 5 && y === 3) t = T.ROOF;
+      if (x === 3 && y === 6) t = T.DOOR;
+      // More buildings upper right
+      if (x >= 27 && x <= 30 && y >= 3 && y <= 5) t = T.WALL;
+      if (x >= 27 && x <= 30 && y === 2) t = T.ROOF;
+      if (x === 28 && y === 5) t = T.DOOR;
+      // Lamp posts
+      if ((x === 4 && y === 9) || (x === 12 && y === 9) || (x === 20 && y === 9) || (x === 28 && y === 9)) t = T.LAMP;
+      // Borders
+      if (y === 0) t = T.FENCE;
+      if (y === 19) t = T.FENCE;
+      // Right exit
+      if (x === 31 && y !== 9 && y !== 10) t = T.FENCE;
+      // Sign near police
+      if (x === 19 && y === 6) t = T.SIGN;
+      // Trees decorating
+      if ((x === 17 && y === 8) || (x === 26 && y === 8) || (x === 1 && y === 8)) t = T.TREE;
+      if ((x === 17 && y === 13) || (x === 26 && y === 13)) t = T.TREE;
+      m[y][x] = t;
+    }
+  }
+  return m;
+}
+
+function buildMap_forest() {
+  const m = [];
+  for (let y = 0; y < 24; y++) {
+    m[y] = [];
+    for (let x = 0; x < 35; x++) {
+      let t = T.DARK_GRASS;
+      // Winding path
+      if (y >= 10 && y <= 12 && x <= 12) t = T.PATH;
+      if (x >= 11 && x <= 13 && y >= 7 && y <= 11) t = T.PATH;
+      if (y >= 7 && y <= 9 && x >= 12 && x <= 22) t = T.PATH;
+      if (x >= 21 && x <= 23 && y >= 5 && y <= 8) t = T.PATH;
+      if (y >= 4 && y <= 6 && x >= 22 && x <= 32) t = T.PATH;
+      // Dense trees
+      for (let i = 0; i < 60; i++) {
+        let tx = [0,1,2,3,34,33,32,0,1,34,33,
+                  5,7,9,15,17,25,27,29,31,
+                  3,6,8,14,16,18,24,26,28,30,
+                  4,10,19,23,33,1,2,32,
+                  5,11,20,22,34,0,31,
+                  7,13,21,24,28,
+                  2,8,15,26,30,12,16,20,29,6][i] || 0;
+        let ty = [0,0,0,0,0,0,0,23,23,23,23,
+                  1,2,1,2,1,2,1,2,1,
+                  15,16,17,18,19,15,16,17,18,19,
+                  20,21,22,20,21,22,14,14,
+                  3,3,3,3,3,13,13,
+                  14,15,16,17,20,
+                  21,22,23,21,22,14,19,18,15,23][i] || 0;
+        if (tx < 35 && ty < 24 && m[ty] && m[ty][tx] === T.DARK_GRASS) m[ty][tx] = T.DEAD_TREE;
+      }
+      // Rocks
+      if ((x === 15 && y === 11) || (x === 18 && y === 6) || (x === 25 && y === 9) ||
+          (x === 8 && y === 14) || (x === 28 && y === 3)) t === T.DARK_GRASS ? (m[y] && (m[y][x] = T.ROCK)) : 0;
+      // Portal area
+      if (x >= 29 && x <= 31 && y >= 4 && y <= 6) {
+        if (x === 30 && y === 5) t = T.PORTAL;
+      }
+      // Borders
+      if (y === 0 || y === 23) t = T.DEAD_TREE;
+      if (x === 34) t = T.DEAD_TREE;
+      if (m[y]) m[y][x] = t;
+    }
+  }
+  // fix rocks properly
+  m[11][15] = T.ROCK;
+  m[6][18] = T.ROCK;
+  m[9][25] = T.ROCK;
+  m[14][8] = T.ROCK;
+  m[3][28] = T.ROCK;
+  return m;
+}
+
+// ── PARTICLES ──
+let particles = [];
+function initParticles(type) {
+  particles = [];
+  if (type === 'sakura') {
+    for (let i = 0; i < 25; i++) {
+      particles.push({
+        x: Math.random() * 30 * TILE, y: Math.random() * 22 * TILE,
+        vx: 0.3 + Math.random() * 0.5, vy: 0.5 + Math.random() * 0.8,
+        size: 3 + Math.random() * 3, rot: Math.random() * Math.PI * 2,
+        rotSpeed: 0.02 + Math.random() * 0.03, type: 'sakura',
+      });
+    }
+  } else if (type === 'fog') {
+    for (let i = 0; i < 15; i++) {
+      particles.push({
+        x: Math.random() * 35 * TILE, y: Math.random() * 24 * TILE,
+        vx: 0.2 + Math.random() * 0.3, vy: 0,
+        size: 40 + Math.random() * 60, alpha: 0.1 + Math.random() * 0.15,
+        type: 'fog',
+      });
+    }
+  }
+}
+
+function updateParticles(map) {
+  const mw = map.w * TILE, mh = map.h * TILE;
+  for (let p of particles) {
+    p.x += p.vx; p.y += (p.vy || 0);
+    if (p.rot !== undefined) p.rot += p.rotSpeed;
+    if (p.x > mw + 20) p.x = -20;
+    if (p.y > mh + 20) p.y = -20;
+  }
+}
+
+function drawParticles() {
+  for (let p of particles) {
+    let sx = p.x - cam.x, sy = p.y - cam.y;
+    if (sx < -60 || sx > W + 60 || sy < -60 || sy > H + 60) continue;
+    if (p.type === 'sakura') {
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(p.rot);
+      ctx.fillStyle = C.sakura;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ff9cb0';
+      ctx.beginPath();
+      ctx.ellipse(1, 1, p.size * 0.5, p.size * 0.3, 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (p.type === 'fog') {
+      ctx.fillStyle = `rgba(30,25,50,${p.alpha})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+// ── DRAWING HELPERS ──
+function drawTile(x, y, type, mapName) {
+  const sx = x * TILE - cam.x, sy = y * TILE - cam.y;
+  if (sx < -TILE || sx > W + TILE || sy < -TILE || sy > H + TILE) return;
+
+  switch (type) {
+    case T.GRASS:
+      ctx.fillStyle = C.grass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      // Grass detail
+      ctx.fillStyle = C.grassDark;
+      if ((x + y) % 3 === 0) { ctx.fillRect(sx+4, sy+8, 2, 6); ctx.fillRect(sx+7, sy+6, 2, 8); }
+      if ((x + y) % 5 === 0) { ctx.fillRect(sx+20, sy+14, 2, 5); ctx.fillRect(sx+23, sy+12, 2, 7); }
+      break;
+    case T.DARK_GRASS:
+      ctx.fillStyle = '#3a5a2a';
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#2d4a1e';
+      if ((x + y) % 2 === 0) { ctx.fillRect(sx+5, sy+10, 2, 6); ctx.fillRect(sx+18, sy+6, 2, 8); }
+      break;
+    case T.PATH:
+      ctx.fillStyle = C.path;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.pathEdge;
+      ctx.fillRect(sx + 2, sy + 2, 4, 4);
+      ctx.fillRect(sx + 18, sy + 20, 5, 5);
+      ctx.fillRect(sx + 24, sy + 6, 3, 3);
+      break;
+    case T.WALL:
+      ctx.fillStyle = C.wallLight;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.wallDark;
+      ctx.fillRect(sx, sy + TILE - 2, TILE, 2);
+      ctx.fillRect(sx + TILE - 1, sy, 1, TILE);
+      break;
+    case T.WINDOW_WALL:
+      ctx.fillStyle = C.wallLight;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.window;
+      ctx.fillRect(sx + 6, sy + 6, 20, 16);
+      ctx.fillStyle = C.windowFrame;
+      ctx.fillRect(sx + 5, sy + 5, 22, 2);
+      ctx.fillRect(sx + 5, sy + 22, 22, 2);
+      ctx.fillRect(sx + 5, sy + 5, 2, 19);
+      ctx.fillRect(sx + 25, sy + 5, 2, 19);
+      ctx.fillRect(sx + 15, sy + 5, 2, 19);
+      break;
+    case T.ROOF:
+      ctx.fillStyle = C.roof;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.roofDark;
+      for (let i = 0; i < TILE; i += 8) ctx.fillRect(sx + i, sy + TILE - 4, 8, 2);
+      ctx.fillRect(sx, sy + TILE - 1, TILE, 1);
+      break;
+    case T.DOOR:
+      ctx.fillStyle = C.wallLight;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.door;
+      ctx.fillRect(sx + 8, sy + 4, 16, TILE - 4);
+      ctx.fillStyle = '#aa8844';
+      ctx.fillRect(sx + 20, sy + 16, 3, 3);
+      break;
+    case T.WATER:
+      ctx.fillStyle = C.water;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.waterDeep;
+      const wt = Date.now() * 0.001;
+      ctx.fillRect(sx + 4 + Math.sin(wt + x) * 3, sy + 8, 12, 2);
+      ctx.fillRect(sx + 10 + Math.sin(wt + y) * 3, sy + 20, 10, 2);
+      break;
+    case T.TREE:
+      // base
+      ctx.fillStyle = mapName === 'forest' ? '#3a5a2a' : C.grass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      // trunk
+      ctx.fillStyle = C.trunk;
+      ctx.fillRect(sx + 12, sy + 16, 8, 16);
+      // canopy
+      ctx.fillStyle = C.tree;
+      ctx.beginPath();
+      ctx.arc(sx + 16, sy + 10, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = C.treeDark;
+      ctx.beginPath();
+      ctx.arc(sx + 14, sy + 8, 8, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case T.DEAD_TREE:
+      ctx.fillStyle = '#3a5a2a';
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.deadTree;
+      ctx.fillRect(sx + 13, sy + 8, 6, 24);
+      // branches
+      ctx.fillRect(sx + 6, sy + 10, 10, 3);
+      ctx.fillRect(sx + 16, sy + 6, 10, 3);
+      ctx.fillRect(sx + 4, sy + 4, 4, 3);
+      ctx.fillRect(sx + 22, sy + 2, 4, 3);
+      break;
+    case T.ROCK:
+      ctx.fillStyle = mapName === 'forest' ? '#3a5a2a' : C.grass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.rock;
+      ctx.beginPath();
+      ctx.ellipse(sx + 16, sy + 20, 12, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = C.rockDark;
+      ctx.beginPath();
+      ctx.ellipse(sx + 14, sy + 18, 6, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case T.FENCE:
+      ctx.fillStyle = mapName === 'forest' ? '#3a5a2a' : C.grass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.fence;
+      ctx.fillRect(sx, sy + 10, TILE, 3);
+      ctx.fillRect(sx, sy + 20, TILE, 3);
+      ctx.fillRect(sx + 4, sy + 6, 3, 20);
+      ctx.fillRect(sx + 25, sy + 6, 3, 20);
+      break;
+    case T.PORTAL:
+      ctx.fillStyle = '#3a5a2a';
+      ctx.fillRect(sx, sy, TILE, TILE);
+      const pt = Date.now() * 0.003;
+      ctx.fillStyle = `rgba(120,60,220,${0.3 + Math.sin(pt) * 0.15})`;
+      ctx.beginPath();
+      ctx.arc(sx + 16, sy + 16, 14 + Math.sin(pt * 1.5) * 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = `rgba(180,100,255,${0.4 + Math.sin(pt + 1) * 0.2})`;
+      ctx.beginPath();
+      ctx.arc(sx + 16, sy + 16, 8 + Math.sin(pt * 2) * 2, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case T.FLOOR:
+      ctx.fillStyle = '#d4c4a0';
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#c4b490';
+      ctx.fillRect(sx + TILE - 1, sy, 1, TILE);
+      ctx.fillRect(sx, sy + TILE - 1, TILE, 1);
+      break;
+    case T.BUSH:
+      ctx.fillStyle = C.grass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#3a8030';
+      ctx.beginPath();
+      ctx.arc(sx + 16, sy + 18, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2a6020';
+      ctx.beginPath();
+      ctx.arc(sx + 12, sy + 16, 6, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case T.FLOWER:
+      ctx.fillStyle = C.grass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      const fc = ['#ff6b8a','#ffaa44','#ff55cc','#ffff44','#88ccff'][(x*7+y*3)%5];
+      ctx.fillStyle = '#4a8a3a';
+      ctx.fillRect(sx + 14, sy + 12, 2, 10);
+      ctx.fillStyle = fc;
+      ctx.beginPath();
+      ctx.arc(sx + 15, sy + 10, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(sx + 15, sy + 10, 2, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case T.BRIDGE:
+      ctx.fillStyle = '#a08050';
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#806030';
+      ctx.fillRect(sx, sy, TILE, 3);
+      ctx.fillRect(sx, sy + TILE - 3, TILE, 3);
+      break;
+    case T.SIGN:
+      ctx.fillStyle = mapName === 'forest' ? '#3a5a2a' : C.grass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#8b6b3e';
+      ctx.fillRect(sx + 14, sy + 14, 4, 16);
+      ctx.fillStyle = '#c4a060';
+      ctx.fillRect(sx + 6, sy + 6, 20, 12);
+      ctx.fillStyle = '#8b6b3e';
+      ctx.fillRect(sx + 8, sy + 9, 16, 2);
+      ctx.fillRect(sx + 10, sy + 13, 12, 2);
+      break;
+    case T.LAMP:
+      ctx.fillStyle = mapName === 'forest' ? '#3a5a2a' : C.grass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = '#666';
+      ctx.fillRect(sx + 14, sy + 10, 4, 22);
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath();
+      ctx.arc(sx + 16, sy + 8, 5, 0, Math.PI * 2);
+      ctx.fill();
+      // glow
+      ctx.fillStyle = 'rgba(255,215,0,0.15)';
+      ctx.beginPath();
+      ctx.arc(sx + 16, sy + 8, 18, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+  }
+}
+
+// ── CHARACTER DRAWING ──
+function drawCharSprite(x, y, char, dir, frame, highlight) {
+  const sx = x - cam.x, sy = y - cam.y;
+  if (sx < -TILE || sx > W + TILE || sy < -TILE || sy > H + TILE) return;
+
+  // Highlight ring
+  if (highlight) {
+    ctx.strokeStyle = 'rgba(255,255,100,0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(sx + 16, sy + 28, 14, 6, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  const bounce = Math.sin(frame * 0.3) * 2;
+  const isMoving = Math.abs(bounce) > 0.5;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath();
+  ctx.ellipse(sx + 16, sy + 30, 10, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Body
+  ctx.fillStyle = char.shirt;
+  ctx.fillRect(sx + 8, sy + 14 + (isMoving ? bounce * 0.3 : 0), 16, 12);
+
+  // Legs
+  ctx.fillStyle = char.pants;
+  const legOffset = isMoving ? Math.sin(frame * 0.6) * 3 : 0;
+  ctx.fillRect(sx + 9, sy + 24, 5, 6 + legOffset);
+  ctx.fillRect(sx + 18, sy + 24, 5, 6 - legOffset);
+
+  // Arms
+  ctx.fillStyle = char.skin;
+  const armSwing = isMoving ? Math.sin(frame * 0.6) * 2 : 0;
+  ctx.fillRect(sx + 4, sy + 15 + armSwing, 5, 8);
+  ctx.fillRect(sx + 23, sy + 15 - armSwing, 5, 8);
+
+  // Head
+  ctx.fillStyle = char.skin;
+  ctx.beginPath();
+  ctx.arc(sx + 16, sy + 10 + (isMoving ? bounce * 0.2 : 0), 10, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Hair
+  ctx.fillStyle = char.hair;
+  const hb = isMoving ? bounce * 0.15 : 0;
+  if (char.hairStyle === 'spiky') {
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 7 + hb, 11, Math.PI, 0);
+    ctx.fill();
+    // Spikes
+    ctx.beginPath();
+    ctx.moveTo(sx + 5, sy + 8); ctx.lineTo(sx + 8, sy - 2 + hb); ctx.lineTo(sx + 12, sy + 6);
+    ctx.moveTo(sx + 10, sy + 5); ctx.lineTo(sx + 14, sy - 4 + hb); ctx.lineTo(sx + 18, sy + 4);
+    ctx.moveTo(sx + 16, sy + 4); ctx.lineTo(sx + 20, sy - 3 + hb); ctx.lineTo(sx + 24, sy + 6);
+    ctx.moveTo(sx + 22, sy + 6); ctx.lineTo(sx + 26, sy - 1 + hb); ctx.lineTo(sx + 28, sy + 8);
+    ctx.fill();
+  } else if (char.hairStyle === 'long') {
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 7 + hb, 12, Math.PI, 0);
+    ctx.fill();
+    ctx.fillRect(sx + 4, sy + 7, 4, 16 + hb);
+    ctx.fillRect(sx + 24, sy + 7, 4, 16 + hb);
+  } else if (char.hairStyle === 'short') {
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 7 + hb, 11, Math.PI, Math.PI * 0.05);
+    ctx.fill();
+  } else if (char.hairStyle === 'messy') {
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 7 + hb, 12, Math.PI, 0);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(sx + 6, sy + 5); ctx.lineTo(sx + 3, sy + 0 + hb); ctx.lineTo(sx + 10, sy + 5);
+    ctx.moveTo(sx + 20, sy + 3); ctx.lineTo(sx + 24, sy - 2 + hb); ctx.lineTo(sx + 27, sy + 5);
+    ctx.fill();
+  } else if (char.hairStyle === 'bun') {
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 7 + hb, 11, Math.PI, 0);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy - 1 + hb, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Eyes
+  if (dir !== 1) { // not facing up
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(sx + 10, sy + 8, 5, 5);
+    ctx.fillRect(sx + 18, sy + 8, 5, 5);
+    ctx.fillStyle = char.eyes;
+    ctx.fillRect(sx + 12, sy + 9, 3, 4);
+    ctx.fillRect(sx + 20, sy + 9, 3, 4);
+    // Eye shine
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(sx + 13, sy + 9, 1, 1);
+    ctx.fillRect(sx + 21, sy + 9, 1, 1);
+  }
+}
+
+function drawObjectSprite(x, y, type) {
+  const sx = x - cam.x, sy = y - cam.y;
+  if (sx < -TILE*2 || sx > W + TILE*2 || sy < -TILE*2 || sy > H + TILE*2) return;
+
+  if (type === 'backpack') {
+    // Highlight ring
+    ctx.strokeStyle = 'rgba(255,200,50,0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(sx + 16, sy + 28, 10, 5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    // Backpack body
+    ctx.fillStyle = '#3388cc';
+    ctx.beginPath();
+    ctx.roundRect(sx + 6, sy + 8, 20, 18, 4);
+    ctx.fill();
+    ctx.fillStyle = '#2266aa';
+    ctx.beginPath();
+    ctx.roundRect(sx + 8, sy + 14, 16, 8, 3);
+    ctx.fill();
+    // Straps
+    ctx.fillStyle = '#225588';
+    ctx.fillRect(sx + 8, sy + 4, 3, 8);
+    ctx.fillRect(sx + 21, sy + 4, 3, 8);
+    // Buckle
+    ctx.fillStyle = '#ccc';
+    ctx.fillRect(sx + 14, sy + 16, 4, 3);
+  } else if (type === 'portal') {
+    const pt = Date.now() * 0.003;
+    // Outer glow
+    ctx.fillStyle = `rgba(100,40,200,${0.15 + Math.sin(pt) * 0.05})`;
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 16, 40 + Math.sin(pt) * 5, 0, Math.PI * 2);
+    ctx.fill();
+    // Middle ring
+    ctx.strokeStyle = `rgba(160,80,255,${0.5 + Math.sin(pt * 1.3) * 0.2})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 16, 25 + Math.sin(pt * 1.5) * 3, 0, Math.PI * 2);
+    ctx.stroke();
+    // Inner swirl
+    ctx.fillStyle = `rgba(200,120,255,${0.6 + Math.sin(pt * 2) * 0.2})`;
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 16, 12 + Math.sin(pt * 2) * 2, 0, Math.PI * 2);
+    ctx.fill();
+    // Core
+    ctx.fillStyle = `rgba(255,200,255,${0.7 + Math.sin(pt * 3) * 0.2})`;
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 16, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // Floating particles
+    for (let i = 0; i < 6; i++) {
+      const a = pt + i * Math.PI / 3;
+      const r = 18 + Math.sin(pt * 2 + i) * 6;
+      ctx.fillStyle = `rgba(180,100,255,${0.5 + Math.sin(pt + i) * 0.3})`;
+      ctx.beginPath();
+      ctx.arc(sx + 16 + Math.cos(a) * r, sy + 16 + Math.sin(a) * r, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+// ── DIALOGUE PORTRAIT ──
+function drawPortrait(char, x, y, size) {
+  if (!char) return;
+  const s = size;
+  // Background circle
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.arc(x + s/2, y + s/2, s/2 + 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Face
+  ctx.fillStyle = char.skin;
+  ctx.beginPath();
+  ctx.arc(x + s/2, y + s * 0.48, s * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Hair
+  ctx.fillStyle = char.hair;
+  if (char.hairStyle === 'spiky') {
+    ctx.beginPath();
+    ctx.arc(x + s/2, y + s * 0.38, s * 0.38, Math.PI, 0);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + s*0.15, y + s*0.35); ctx.lineTo(x + s*0.25, y + s*0.05); ctx.lineTo(x + s*0.4, y + s*0.25);
+    ctx.moveTo(x + s*0.3, y + s*0.2); ctx.lineTo(x + s*0.45, y); ctx.lineTo(x + s*0.6, y + s*0.15);
+    ctx.moveTo(x + s*0.55, y + s*0.15); ctx.lineTo(x + s*0.7, y + s*0.02); ctx.lineTo(x + s*0.8, y + s*0.25);
+    ctx.fill();
+  } else if (char.hairStyle === 'long') {
+    ctx.beginPath();
+    ctx.arc(x + s/2, y + s * 0.35, s * 0.4, Math.PI, 0);
+    ctx.fill();
+    ctx.fillRect(x + s*0.1, y + s*0.35, s*0.15, s*0.45);
+    ctx.fillRect(x + s*0.75, y + s*0.35, s*0.15, s*0.45);
+    // Bangs
+    ctx.beginPath();
+    ctx.moveTo(x + s*0.2, y + s*0.35); ctx.lineTo(x + s*0.3, y + s*0.5); ctx.lineTo(x + s*0.4, y + s*0.35);
+    ctx.fill();
+  } else if (char.hairStyle === 'short') {
+    ctx.beginPath();
+    ctx.arc(x + s/2, y + s * 0.38, s * 0.38, Math.PI, 0.05);
+    ctx.fill();
+  } else if (char.hairStyle === 'messy') {
+    ctx.beginPath();
+    ctx.arc(x + s/2, y + s * 0.38, s * 0.4, Math.PI, 0);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + s*0.15, y + s*0.3); ctx.lineTo(x + s*0.05, y + s*0.1); ctx.lineTo(x + s*0.3, y + s*0.25);
+    ctx.moveTo(x + s*0.65, y + s*0.2); ctx.lineTo(x + s*0.85, y + s*0.05); ctx.lineTo(x + s*0.9, y + s*0.3);
+    ctx.fill();
+  } else if (char.hairStyle === 'bun') {
+    ctx.beginPath();
+    ctx.arc(x + s/2, y + s * 0.38, s * 0.38, Math.PI, 0);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + s/2, y + s * 0.1, s * 0.14, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Big anime eyes
+  const ey = y + s * 0.44;
+  // White
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(x + s*0.35, ey, s*0.1, s*0.12, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + s*0.65, ey, s*0.1, s*0.12, 0, 0, Math.PI*2); ctx.fill();
+  // Iris
+  ctx.fillStyle = char.eyes;
+  ctx.beginPath(); ctx.ellipse(x + s*0.35, ey + s*0.02, s*0.07, s*0.09, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + s*0.65, ey + s*0.02, s*0.07, s*0.09, 0, 0, Math.PI*2); ctx.fill();
+  // Pupil
+  ctx.fillStyle = '#111';
+  ctx.beginPath(); ctx.arc(x + s*0.35, ey + s*0.03, s*0.035, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + s*0.65, ey + s*0.03, s*0.035, 0, Math.PI*2); ctx.fill();
+  // Shine
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(x + s*0.32, ey - s*0.01, s*0.025, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + s*0.62, ey - s*0.01, s*0.025, 0, Math.PI*2); ctx.fill();
+
+  // Mouth
+  ctx.strokeStyle = '#c08060';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(x + s/2, y + s*0.6, s*0.06, 0.1, Math.PI - 0.1);
+  ctx.stroke();
+
+  // Neck/shoulders hint
+  ctx.fillStyle = char.shirt;
+  ctx.beginPath();
+  ctx.moveTo(x + s*0.25, y + s*0.75);
+  ctx.lineTo(x + s*0.1, y + s);
+  ctx.lineTo(x + s*0.9, y + s);
+  ctx.lineTo(x + s*0.75, y + s*0.75);
+  ctx.fill();
+  ctx.fillStyle = char.skin;
+  ctx.fillRect(x + s*0.42, y + s*0.68, s*0.16, s*0.1);
+}
+
+// ── DIALOGUE SYSTEM ──
+let dialogueQueue = [];
+let dialogueIndex = 0;
+let dialogueText = '';
+let dialogueTimer = 0;
+let dialogueCharIndex = 0;
+let dialogueSpeed = 30; // ms per character
+let currentSpeaker = null;
+
+function startDialogue(lines) {
+  dialogueQueue = lines;
+  dialogueIndex = 0;
+  dialogueCharIndex = 0;
+  dialogueTimer = 0;
+  dialogueText = '';
+  gameState = 'dialogue';
+  if (lines[0]) currentSpeaker = lines[0].who;
+}
+
+function updateDialogue(dt) {
+  if (dialogueIndex >= dialogueQueue.length) {
+    gameState = 'playing';
+    dialogueQueue = [];
+    return;
+  }
+  const line = dialogueQueue[dialogueIndex];
+  if (line.text === '__ENDING__') {
+    gameState = 'ending';
+    endingTimer = 0;
+    return;
+  }
+  currentSpeaker = line.who;
+  dialogueTimer += dt;
+  if (dialogueCharIndex < line.text.length) {
+    while (dialogueTimer >= dialogueSpeed && dialogueCharIndex < line.text.length) {
+      dialogueTimer -= dialogueSpeed;
+      dialogueCharIndex++;
+      dialogueText = line.text.substring(0, dialogueCharIndex);
+    }
+  }
+  if (tapAction) {
+    tapAction = false;
+    if (dialogueCharIndex < line.text.length) {
+      dialogueCharIndex = line.text.length;
+      dialogueText = line.text;
+    } else {
+      dialogueIndex++;
+      dialogueCharIndex = 0;
+      dialogueTimer = 0;
+      dialogueText = '';
+    }
+  }
+}
+
+function drawDialogue() {
+  const boxH = Math.min(160, H * 0.28);
+  const boxY = H - boxH - 10;
+  const boxX = 10;
+  const boxW = W - 20;
+
+  // Box background
+  ctx.fillStyle = 'rgba(10,5,30,0.88)';
+  ctx.beginPath();
+  ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+  ctx.fill();
+
+  // Border
+  ctx.strokeStyle = 'rgba(150,120,255,0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+  ctx.stroke();
+
+  // Portrait
+  const portraitSize = Math.min(70, boxH - 20);
+  const char = currentSpeaker ? CHARS[currentSpeaker] : null;
+  if (char) {
+    drawPortrait(char, boxX + 10, boxY + (boxH - portraitSize) / 2, portraitSize);
+  }
+
+  // Name
+  const textX = char ? boxX + portraitSize + 25 : boxX + 20;
+  if (currentSpeaker && char) {
+    ctx.fillStyle = char.hair;
+    ctx.font = 'bold 15px "Segoe UI", sans-serif';
+    ctx.fillText(char.name, textX, boxY + 22);
+  } else if (!currentSpeaker) {
+    ctx.fillStyle = '#aaa';
+    ctx.font = 'italic 14px "Segoe UI", sans-serif';
+  }
+
+  // Text
+  ctx.fillStyle = '#eee';
+  ctx.font = '14px "Segoe UI", sans-serif';
+  const maxWidth = boxW - (char ? portraitSize + 45 : 40);
+  wrapText(dialogueText, textX, boxY + 42, maxWidth, 20);
+
+  // Continue indicator
+  if (dialogueCharIndex >= (dialogueQueue[dialogueIndex]?.text?.length || 0)) {
+    const blinkAlpha = 0.4 + Math.sin(Date.now() * 0.005) * 0.4;
+    ctx.fillStyle = `rgba(200,180,255,${blinkAlpha})`;
+    ctx.font = '16px sans-serif';
+    ctx.fillText('▼', boxX + boxW - 30, boxY + boxH - 15);
+  }
+}
+
+function wrapText(text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  let testLine, metrics;
+  let ly = y;
+  for (let n = 0; n < words.length; n++) {
+    testLine = line + words[n] + ' ';
+    metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && n > 0) {
+      ctx.fillText(line, x, ly);
+      line = words[n] + ' ';
+      ly += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, ly);
+}
+
+// ── UI ──
+function drawUI() {
+  // Objective bar
+  ctx.fillStyle = 'rgba(10,5,30,0.7)';
+  ctx.beginPath();
+  ctx.roundRect(10, 10, Math.min(W - 20, 340), 36, 8);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(150,120,255,0.4)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(10, 10, Math.min(W - 20, 340), 36, 8);
+  ctx.stroke();
+  ctx.fillStyle = '#c8b8ff';
+  ctx.font = 'bold 11px "Segoe UI", sans-serif';
+  ctx.fillText('OBJECTIVE', 20, 26);
+  ctx.fillStyle = '#eee';
+  ctx.font = '12px "Segoe UI", sans-serif';
+  ctx.fillText(objective, 95, 26);
+
+  // Action button hint
+  if (nearbyInteractable()) {
+    const bx = W - 70, by = H - 140;
+    ctx.fillStyle = 'rgba(255,200,50,0.25)';
+    ctx.beginPath();
+    ctx.arc(bx + 25, by + 25, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,200,50,0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(bx + 25, by + 25, 28, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Talk', bx + 25, by + 30);
+    ctx.textAlign = 'start';
+  }
+
+  // Virtual joystick
+  if (joystick.active) {
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.beginPath();
+    ctx.arc(joystick.sx, joystick.sy, 50, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.beginPath();
+    ctx.arc(joystick.sx + joystick.dx * 50, joystick.sy + joystick.dy * 50, 20, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// ── INTERACTION ──
+function nearbyInteractable() {
+  const map = MAPS[currentMap];
+  for (let npc of map.npcs) {
+    const dx = (player.x + 16) - (npc.x + 16);
+    const dy = (player.y + 16) - (npc.y + 16);
+    if (Math.sqrt(dx * dx + dy * dy) < INTERACT_DIST) return npc;
+  }
+  return null;
+}
+
+function tryInteract() {
+  const npc = nearbyInteractable();
+  if (npc && npc.dialogue) {
+    const lines = npc.dialogue();
+    if (lines && lines.length > 0) startDialogue(lines);
+  }
+}
+
+// ── GAME LOOP ──
+let lastTime = 0;
+function gameLoop(time) {
+  const dt = Math.min(time - lastTime, 50);
+  lastTime = time;
+
+  // Keyboard input
+  if (gameState === 'playing') {
+    let kdx = 0, kdy = 0;
+    if (keys['ArrowLeft'] || keys['a']) kdx = -1;
+    if (keys['ArrowRight'] || keys['d']) kdx = 1;
+    if (keys['ArrowUp'] || keys['w']) kdy = -1;
+    if (keys['ArrowDown'] || keys['s']) kdy = 1;
+    if (kdx || kdy) {
+      const len = Math.sqrt(kdx*kdx + kdy*kdy);
+      joystick.dx = kdx / len; joystick.dy = kdy / len;
+    } else if (!joystick.active) {
+      joystick.dx = 0; joystick.dy = 0;
+    }
+  }
+
+  update(dt);
+  draw();
+  if (actionBtn.pressed) { actionBtn.pressed = false; }
+  requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+  if (gameState === 'transition') {
+    transitionAlpha += 0.04;
+    if (transitionAlpha >= 1) {
+      currentMap = transitionTarget;
+      player.x = transitionSpawn.x;
+      player.y = transitionSpawn.y;
+      initParticles(MAPS[currentMap].particles);
+      transitionAlpha = 1;
+      // Set objective for new map
+      if (currentMap === 'town' && !storyFlags.talkedOfficer) objective = 'Investigate the town for clues';
+      if (currentMap === 'forest') objective = 'Search the forest for Glen';
+      if (currentMap === 'neighborhood' && storyFlags.canGoTown) objective = 'Head east to the town center →';
+    }
+    if (transitionAlpha >= 1) {
+      // Fade back in
+      gameState = 'fadein';
+    }
+    return;
+  }
+  if (gameState === 'fadein') {
+    transitionAlpha -= 0.04;
+    if (transitionAlpha <= 0) {
+      transitionAlpha = 0;
+      gameState = 'playing';
+    }
+    return;
+  }
+  if (gameState === 'dialogue') {
+    updateDialogue(dt);
+    return;
+  }
+  if (gameState === 'ending') {
+    endingTimer += dt;
+    return;
+  }
+  if (gameState !== 'playing') return;
+
+  const map = MAPS[currentMap];
+
+  // Movement
+  let dx = joystick.dx * SPEED;
+  let dy = joystick.dy * SPEED;
+  player.moving = (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1);
+
+  if (player.moving) {
+    // Direction
+    if (Math.abs(dx) > Math.abs(dy)) {
+      player.dir = dx > 0 ? 3 : 2;
+    } else {
+      player.dir = dy > 0 ? 0 : 1;
+    }
+    player.animTimer += ANIM_SPEED;
+    player.frame = player.animTimer;
+
+    // Collision X
+    let nx = player.x + dx;
+    let tileX1 = Math.floor((nx + 6) / TILE);
+    let tileX2 = Math.floor((nx + 26) / TILE);
+    let tileY1 = Math.floor((player.y + 12) / TILE);
+    let tileY2 = Math.floor((player.y + 30) / TILE);
+    let canMoveX = true;
+    for (let ty = tileY1; ty <= tileY2; ty++) {
+      for (let tx = tileX1; tx <= tileX2; tx++) {
+        if (ty < 0 || ty >= map.h || tx < 0 || tx >= map.w || !WALKABLE.has(map.tiles[ty][tx])) {
+          canMoveX = false; break;
+        }
+      }
+      if (!canMoveX) break;
+    }
+    if (canMoveX) player.x = nx;
+
+    // Collision Y
+    let ny = player.y + dy;
+    tileX1 = Math.floor((player.x + 6) / TILE);
+    tileX2 = Math.floor((player.x + 26) / TILE);
+    tileY1 = Math.floor((ny + 12) / TILE);
+    tileY2 = Math.floor((ny + 30) / TILE);
+    let canMoveY = true;
+    for (let ty = tileY1; ty <= tileY2; ty++) {
+      for (let tx = tileX1; tx <= tileX2; tx++) {
+        if (ty < 0 || ty >= map.h || tx < 0 || tx >= map.w || !WALKABLE.has(map.tiles[ty][tx])) {
+          canMoveY = false; break;
+        }
+      }
+      if (!canMoveY) break;
+    }
+    if (canMoveY) player.y = ny;
+  }
+
+  // Check map exits
+  const px = Math.floor((player.x + 16) / TILE);
+  const py = Math.floor((player.y + 20) / TILE);
+  for (let exit of map.exits) {
+    if (px === exit.x && py === exit.y) {
+      if (exit.condition && !exit.condition()) {
+        // Show hint
+        if (!storyFlags._hintShown) {
+          storyFlags._hintShown = true;
+          // Brief hint
+        }
+        continue;
+      }
+      transitionTarget = exit.targetMap;
+      transitionSpawn = { x: exit.spawnX, y: exit.spawnY };
+      transitionAlpha = 0;
+      gameState = 'transition';
+      break;
+    }
+  }
+
+  // Interact
+  if (actionBtn.pressed) {
+    tryInteract();
+  }
+
+  // Camera
+  cam.x = player.x + 16 - W / 2;
+  cam.y = player.y + 16 - H / 2;
+  cam.x = Math.max(0, Math.min(cam.x, map.w * TILE - W));
+  cam.y = Math.max(0, Math.min(cam.y * 1, map.h * TILE - H));
+  if (map.w * TILE < W) cam.x = (map.w * TILE - W) / 2;
+  if (map.h * TILE < H) cam.y = (map.h * TILE - H) / 2;
+
+  // Particles
+  updateParticles(map);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  if (gameState === 'title') {
+    drawTitle();
+    return;
+  }
+
+  if (gameState === 'ending') {
+    drawEnding();
+    return;
+  }
+
+  const map = MAPS[currentMap];
+
+  // Draw tiles
+  const startX = Math.max(0, Math.floor(cam.x / TILE));
+  const startY = Math.max(0, Math.floor(cam.y / TILE));
+  const endX = Math.min(map.w - 1, Math.ceil((cam.x + W) / TILE));
+  const endY = Math.min(map.h - 1, Math.ceil((cam.y + H) / TILE));
+
+  for (let y = startY; y <= endY; y++) {
+    for (let x = startX; x <= endX; x++) {
+      drawTile(x, y, map.tiles[y][x], currentMap);
+    }
+  }
+
+  // Draw entities sorted by Y
+  let entities = [];
+  entities.push({ y: player.y, type: 'player' });
+  for (let npc of map.npcs) {
+    entities.push({ y: npc.y, type: 'npc', npc });
+  }
+  entities.sort((a, b) => a.y - b.y);
+
+  for (let e of entities) {
+    if (e.type === 'player') {
+      drawCharSprite(player.x, player.y, player.char, player.dir, player.frame, false);
+    } else if (e.npc.isObject) {
+      drawObjectSprite(e.npc.x, e.npc.y, e.npc.sprite);
+    } else {
+      const isNear = nearbyInteractable() === e.npc;
+      drawCharSprite(e.npc.x, e.npc.y, e.npc.char, e.npc.dir || 0, 0, isNear);
+    }
+  }
+
+  // Particles on top
+  drawParticles();
+
+  // Darkness overlay for forest
+  if (map.darkness) {
+    ctx.fillStyle = `rgba(10,5,25,${map.darkness})`;
+    ctx.fillRect(0, 0, W, H);
+    // Spotlight around player
+    const px = player.x + 16 - cam.x, py = player.y + 16 - cam.y;
+    const grad = ctx.createRadialGradient(px, py, 30, px, py, 180);
+    grad.addColorStop(0, 'rgba(10,5,25,0.35)');
+    grad.addColorStop(1, 'rgba(10,5,25,0)');
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // UI
+  drawUI();
+
+  // Dialogue
+  if (gameState === 'dialogue') {
+    drawDialogue();
+  }
+
+  // Transition overlay
+  if (gameState === 'transition' || gameState === 'fadein') {
+    ctx.fillStyle = `rgba(0,0,0,${transitionAlpha})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+// ── TITLE SCREEN ──
+function drawTitle() {
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#1a0a2e');
+  grad.addColorStop(0.5, '#2d1b4e');
+  grad.addColorStop(1, '#0a0a1a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Stars
+  const t = Date.now() * 0.001;
+  for (let i = 0; i < 50; i++) {
+    const sx = ((i * 137.5) % W);
+    const sy = ((i * 97.3 + i * i * 3.7) % (H * 0.6));
+    const alpha = 0.3 + Math.sin(t + i * 0.5) * 0.3;
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Portal glow
+  const glowY = H * 0.35;
+  ctx.fillStyle = `rgba(100,40,200,${0.15 + Math.sin(t * 2) * 0.05})`;
+  ctx.beginPath();
+  ctx.arc(W/2, glowY, 100 + Math.sin(t) * 10, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = `rgba(160,80,255,${0.1 + Math.sin(t * 1.5) * 0.05})`;
+  ctx.beginPath();
+  ctx.arc(W/2, glowY, 60 + Math.sin(t * 1.3) * 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Title
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 42px "Segoe UI", "Helvetica Neue", sans-serif';
+  ctx.fillText('UNDERDARK', W/2, H * 0.38);
+
+  // Subtitle
+  ctx.fillStyle = '#c8b8ff';
+  ctx.font = '18px "Segoe UI", sans-serif';
+  ctx.fillText('Act 1: The Disappearance', W/2, H * 0.45);
+
+  // Characters silhouettes
+  const chars = [CHARS.hikaru, CHARS.rina, CHARS.kenji];
+  const portraitSize = 50;
+  for (let i = 0; i < 3; i++) {
+    const px = W/2 + (i - 1) * 70;
+    drawPortrait(chars[i], px - portraitSize/2, H * 0.52, portraitSize);
+  }
+
+  // Tap to start
+  const startAlpha = 0.5 + Math.sin(t * 3) * 0.3;
+  ctx.fillStyle = `rgba(200,180,255,${startAlpha})`;
+  ctx.font = '16px "Segoe UI", sans-serif';
+  ctx.fillText('Tap to Start', W/2, H * 0.78);
+
+  // Credits
+  ctx.fillStyle = 'rgba(150,130,200,0.5)';
+  ctx.font = '11px "Segoe UI", sans-serif';
+  ctx.fillText('A School Project', W/2, H * 0.92);
+  ctx.textAlign = 'start';
+}
+
+// ── ENDING SCREEN ──
+function drawEnding() {
+  const progress = Math.min(endingTimer / 8000, 1);
+
+  // Background
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#0a0520');
+  grad.addColorStop(1, '#2a1050');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Portal effect
+  const t = Date.now() * 0.002;
+  for (let i = 0; i < 8; i++) {
+    const a = t + i * Math.PI / 4;
+    const r = 60 + Math.sin(t + i) * 20;
+    ctx.fillStyle = `rgba(160,80,255,${0.1 + Math.sin(t + i * 0.5) * 0.05})`;
+    ctx.beginPath();
+    ctx.arc(W/2 + Math.cos(a) * r, H * 0.3 + Math.sin(a) * r * 0.6, 30 + Math.sin(t * 2 + i) * 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.textAlign = 'center';
+
+  if (progress > 0.1) {
+    const alpha = Math.min((progress - 0.1) * 3, 1);
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.font = 'bold 28px "Segoe UI", sans-serif';
+    ctx.fillText('The Underdark awaits...', W/2, H * 0.35);
+  }
+
+  if (progress > 0.35) {
+    const alpha = Math.min((progress - 0.35) * 3, 1);
+    ctx.fillStyle = `rgba(200,180,255,${alpha})`;
+    ctx.font = '16px "Segoe UI", sans-serif';
+    ctx.fillText('Three friends step into the unknown', W/2, H * 0.45);
+    ctx.fillText('to save the one they lost.', W/2, H * 0.50);
+  }
+
+  if (progress > 0.55) {
+    const alpha = Math.min((progress - 0.55) * 3, 1);
+    const chars = [CHARS.hikaru, CHARS.rina, CHARS.kenji];
+    const portraitSize = 55;
+    for (let i = 0; i < 3; i++) {
+      ctx.globalAlpha = alpha;
+      const px = W/2 + (i - 1) * 80;
+      drawPortrait(chars[i], px - portraitSize/2, H * 0.56, portraitSize);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  if (progress > 0.75) {
+    const alpha = Math.min((progress - 0.75) * 3, 1);
+    ctx.fillStyle = `rgba(255,200,100,${alpha})`;
+    ctx.font = 'bold 22px "Segoe UI", sans-serif';
+    ctx.fillText('End of Act 1', W/2, H * 0.80);
+    ctx.fillStyle = `rgba(200,180,255,${alpha * 0.7})`;
+    ctx.font = '14px "Segoe UI", sans-serif';
+    ctx.fillText('To be continued...', W/2, H * 0.86);
+  }
+
+  ctx.textAlign = 'start';
+}
+
+// ── INIT ──
+function init() {
+  player.x = 5 * TILE;
+  player.y = 8 * TILE;
+  currentMap = 'neighborhood';
+  initParticles(MAPS[currentMap].particles);
+  requestAnimationFrame(gameLoop);
+}
+
+init();
+</script>
+</body>
+</html>
