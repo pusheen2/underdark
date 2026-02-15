@@ -49,6 +49,13 @@ const C = {
   glow: '#a060ff',
   fogColor: 'rgba(20,15,30,',
   sakura: '#ffb7c5',
+  // Act 2 — crystal paradise
+  crystalGrass: '#7bddaa', crystalGrassDark: '#5aba88',
+  crystal: '#bb88ff', crystalDark: '#8855cc', crystalGlow: 'rgba(180,140,255,',
+  // Act 3 — corruption
+  darkFloor: '#2a1a2a', darkFloorDetail: '#1e0e1e',
+  corruptTree: '#3a1a3a', corruptLeaf: '#5a2a5a', corruptBranch: '#2a0a2a',
+  voidColor: '#050010',
 };
 
 // ── CHARACTERS ──
@@ -59,6 +66,10 @@ const CHARS = {
   glen:   { name:'Glen',   hair:'#33cc66', hairStyle:'messy', skin:'#fce4c8', shirt:'#667', pants:'#334', eyes:'#228844' },
   officer:{ name:'Officer Tanaka', hair:'#334', hairStyle:'short', skin:'#f0d0a0', shirt:'#2244aa', pants:'#223', eyes:'#332' },
   shopkeeper:{ name:'Mrs. Yamada', hair:'#996', hairStyle:'bun', skin:'#f0d0a0', shirt:'#aa6633', pants:'#556', eyes:'#553' },
+  glen_boss: { name:'Glen', hair:'#1a6633', hairStyle:'messy', skin:'#c8b8a0', shirt:'#223', pants:'#112', eyes:'#aa22ff' },
+  fairy:     { name:'???', hair:'#aaeeff', hairStyle:'long', skin:'#e8e0ff', shirt:'#ccbbff', pants:'#aaaadd', eyes:'#cc88ff' },
+  larry:     { name:'Larry', hair:'#cc9944', hairStyle:'short', skin:'#f0d0a0', shirt:'#aa4444', pants:'#334', eyes:'#556622' },
+  larry_fake:{ name:'Larry', hair:'#aa7722', hairStyle:'short', skin:'#d8c090', shirt:'#882222', pants:'#223', eyes:'#880044' },
 };
 
 // ── LANGUAGE ──
@@ -139,21 +150,145 @@ const STRINGS = {
   dlg_hikaru_p4:         { en:"I'm going in. Glen needs our help.", ru:"Я иду туда. Глену нужна наша помощь.", tr:"Ben giriyorum. Glen'in yardımımıza ihtiyacı var." },
   dlg_kenji_p2:          { en:"If you're going, we're going with you. We're not leaving anyone behind.", ru:"Если ты идёшь, мы идём с тобой. Мы никого не бросим.", tr:"Sen gidiyorsan, biz de seninle geliyoruz. Kimseyi geride bırakmayız." },
   dlg_portal_2:          { en:"The three of you step forward into the unknown...", ru:"Вы втроём шагаете в неизвестность...", tr:"Üçünüz birlikte bilinmeze doğru adım atıyorsunuz..." },
+
+  // ── ACT 2 & 3 STRINGS ──
+  // Character names
+  name_larry:    { en:'Larry', ru:'Ларри', tr:'Larry' },
+  name_glen_boss:{ en:'Glen', ru:'Глен', tr:'Glen' },
+  // Act titles
+  title_subtitle_act2: { en:'Act 2: The Beautiful Trap', ru:'Акт 2: Прекрасная ловушка', tr:'Perde 2: Güzel Tuzak' },
+  title_subtitle_act3: { en:'Act 3: Whispers in the Dark', ru:'Акт 3: Шёпот во тьме', tr:'Perde 3: Karanlıktaki Fısıltılar' },
+  // Act 2 objectives
+  obj_explore_underdark: { en:'Explore this strange new world', ru:'Исследуй этот странный новый мир', tr:'Bu garip yeni dünyayı keşfet' },
+  obj_find_glen:         { en:'Find Glen deeper in the Underdark', ru:'Найди Глена в глубинах Андердарка', tr:"Glen'i Underdark'ın derinliklerinde bul" },
+  obj_confront_glen:     { en:'Confront Glen', ru:'Противостой Глену', tr:'Glen ile yüzleş' },
+  obj_defeat_glen:       { en:"Survive Glen's attack — get close to him!", ru:'Переживи атаку Глена — подберись к нему!', tr:"Glen'in saldırısından kurtul — ona yaklaş!" },
+  // Act 3 objectives
+  obj_follow_friends:       { en:'Follow your friends deeper', ru:'Следуй за друзьями глубже', tr:'Arkadaşlarını daha derine takip et' },
+  obj_investigate_whispers: { en:'Investigate the whispers', ru:'Расследуй шёпот', tr:'Fısıltıları araştır' },
+  obj_find_larry:           { en:'Approach the figure in the bushes', ru:'Подойди к фигуре в кустах', tr:'Çalılıklardaki figüre yaklaş' },
+  obj_survive_larry:        { en:"Survive! It's not Larry!", ru:'Выживи! Это не Ларри!', tr:'Hayatta kal! Bu Larry değil!' },
+  // Act 2 endings
+  end2_sacrifice: { en:"Glen's light fades...", ru:'Свет Глена угасает...', tr:"Glen'in ışığı sönüyor..." },
+  end2_line1:     { en:'He chose to save the ones he loved', ru:'Он выбрал спасти тех, кого любил', tr:'Sevdiklerini kurtarmayı seçti' },
+  end2_line2:     { en:'even if it meant losing himself.', ru:'даже если это означало потерять себя.', tr:'kendini kaybetmek anlamına gelse bile.' },
+  end2_act:       { en:'End of Act 2', ru:'Конец 2 Акта', tr:'2. Perde Sonu' },
+  end2_cont:      { en:'The darkness deepens...', ru:'Тьма сгущается...', tr:'Karanlık derinleşiyor...' },
+  // Act 3 endings
+  end3_reveal: { en:'The truth was never what it seemed...', ru:'Правда никогда не была такой, какой казалась...', tr:'Gerçek hiçbir zaman göründüğü gibi değildi...' },
+  end3_line1:  { en:'Hikaru alone sees through the lies', ru:'Только Хикару видит сквозь ложь', tr:'Sadece Hikaru yalanları görebiliyor' },
+  end3_line2:  { en:'but his friends have already fallen.', ru:'но его друзья уже пали.', tr:'ama arkadaşları çoktan düşmüş.' },
+  end3_act:    { en:'End of Act 3', ru:'Конец 3 Акта', tr:'3. Perde Sonu' },
+  end3_cont:   { en:'To be continued in Act 4...', ru:'Продолжение в Акте 4...', tr:'4. Perdede devam edecek...' },
+  // Tap to continue
+  ui_tap_continue: { en:'Tap to continue', ru:'Нажми, чтобы продолжить', tr:'Devam etmek için dokun' },
+  // Act 2 — Underdark entrance
+  dlg_arrive_1:       { en:'You emerge into a world of breathtaking beauty.', ru:'Вы выходите в мир захватывающей красоты.', tr:'Nefes kesen güzellikte bir dünyaya çıkıyorsunuz.' },
+  dlg_rina_arrive1:   { en:'Wow... this place is incredible! Look at these crystals!', ru:'Ого... это место невероятное! Посмотри на эти кристаллы!', tr:'Vay... burası inanılmaz! Şu kristallere bak!' },
+  dlg_kenji_arrive1:  { en:"Is this where Glen went? It doesn't seem dangerous at all...", ru:'Сюда ушёл Глен? Совсем не кажется опасным...', tr:'Glen buraya mı gelmiş? Hiç tehlikeli görünmüyor...' },
+  dlg_hikaru_arrive1: { en:'(Wait... I see something they don\'t. Dark shapes behind the beauty... What is this place?)', ru:'(Подожди... Я вижу то, что они не видят. Тёмные формы за красотой... Что это за место?)', tr:'(Dur... Onların görmediği bir şey görüyorum. Güzelliğin arkasındaki karanlık şekiller... Burası ne?)' },
+  dlg_hikaru_arrive2: { en:"Let's keep moving. Glen has to be here somewhere.", ru:'Давайте продолжим. Глен должен быть где-то здесь.', tr:'İlerlemeye devam edelim. Glen burada bir yerde olmalı.' },
+  // Dark sign
+  dlg_dark_sign_1:    { en:'You notice strange dark marks on the ground.', ru:'Вы замечаете странные тёмные следы на земле.', tr:'Yerde garip karanlık izler fark ediyorsunuz.' },
+  dlg_hikaru_sign1:   { en:'(These marks... veins of darkness running through the ground. The others can\'t see them.)', ru:'(Эти следы... вены тьмы, проходящие сквозь землю. Остальные их не видят.)', tr:'(Bu izler... yerden geçen karanlık damarlar. Diğerleri onları göremiyorlar.)' },
+  dlg_hikaru_sign2:   { en:'(This beautiful world is hiding something. I can feel it.)', ru:'(Этот красивый мир что-то скрывает. Я чувствую это.)', tr:'(Bu güzel dünya bir şey saklıyor. Hissedebiliyorum.)' },
+  // Crystal fairy
+  dlg_fairy_1:        { en:'Welcome, travelers... You have been chosen by the Underdark.', ru:'Добро пожаловать, путники... Вы были избраны Андердарком.', tr:'Hoş geldiniz, yolcular... Underdark tarafından seçildiniz.' },
+  dlg_fairy_2:        { en:'Stay as long as you wish. This is a place of peace and beauty.', ru:'Оставайтесь сколько хотите. Это место мира и красоты.', tr:'İstediğiniz kadar kalın. Burası huzur ve güzellik yeri.' },
+  dlg_hikaru_fairy1:  { en:'(Peace? Then why do I see shadows crawling beneath the crystal?)', ru:'(Мир? Тогда почему я вижу тени, ползающие под кристаллами?)', tr:'(Huzur mu? O zaman neden kristallerin altında sürünen gölgeler görüyorum?)' },
+  dlg_rina_fairy1:    { en:'Have you seen a boy with green hair? Our friend Glen?', ru:'Вы видели мальчика с зелёными волосами? Наш друг Глен?', tr:'Yeşil saçlı bir çocuk gördünüz mü? Arkadaşımız Glen?' },
+  dlg_fairy_3:        { en:'Your friend... yes, he went deeper. He was drawn to the heart of this place.', ru:'Ваш друг... да, он ушёл глубже. Его притянуло к сердцу этого места.', tr:'Arkadaşınız... evet, daha derine gitti. Bu yerin kalbine çekildi.' },
+  dlg_fairy_repeat:   { en:'The deeper paths await you... if you dare.', ru:'Более глубокие пути ждут вас... если осмелитесь.', tr:'Daha derin yollar sizi bekliyor... cesaret ederseniz.' },
+  // Act 2 — Glen boss encounter
+  dlg_glen_found_1:   { en:'You see a figure standing in the center of a dark crystal arena.', ru:'Вы видите фигуру в центре тёмной кристальной арены.', tr:'Karanlık kristal arenanın ortasında duran bir figür görüyorsunuz.' },
+  dlg_glen_found_2:   { en:"It's Glen... but something is terribly wrong.", ru:'Это Глен... но что-то ужасно не так.', tr:'Bu Glen... ama bir şeyler çok yanlış.' },
+  dlg_rina_glen1:     { en:"Glen! We finally found you! Come on, let's go home!", ru:'Глен! Мы наконец-то нашли тебя! Пошли домой!', tr:'Glen! Sonunda seni bulduk! Hadi, eve gidelim!' },
+  dlg_glen_boss_1:    { en:'Home...? There is no home. The Underdark IS home now.', ru:'Домой...? Дома нет. Андердарк — теперь дом.', tr:'Eve mi...? Ev yok. Underdark artık EVİMİZ.' },
+  dlg_glen_boss_2:    { en:"You shouldn't have come here. Now you'll stay too... FOREVER.", ru:'Вам не стоило сюда приходить. Теперь останетесь... НАВСЕГДА.', tr:'Buraya gelmemeliydiniz. Artık siz de kalacaksınız... SONSUZA KADAR.' },
+  dlg_kenji_glen1:    { en:"Glen, snap out of it! This isn't you!", ru:'Глен, очнись! Это не ты!', tr:'Glen, kendine gel! Bu sen değilsin!' },
+  dlg_hikaru_glen1:   { en:"He's being controlled... We have to get through to him!", ru:'Его контролируют... Мы должны до него достучаться!', tr:'Kontrol ediliyor... Ona ulaşmalıyız!' },
+  // Boss approach dialogues
+  dlg_boss_approach_1: { en:"Glen... remember us! We're your friends!", ru:'Глен... вспомни нас! Мы твои друзья!', tr:'Glen... bizi hatırla! Biz senin arkadaşlarınız!' },
+  dlg_glen_fight_1:    { en:'F-friends...? No... GET AWAY!', ru:'Д-друзья...? Нет... УХОДИТЕ!', tr:'A-arkadaşlar...? Hayır... UZAKLAŞIN!' },
+  dlg_boss_approach_2: { en:"Fight it, Glen! You're stronger than this darkness!", ru:'Борись, Глен! Ты сильнее этой тьмы!', tr:'Savaş Glen! Bu karanlıktan daha güçlüsün!' },
+  dlg_glen_fight_2:    { en:'I... I can hear you... but it hurts... it hurts so much...', ru:'Я... я слышу вас... но больно... так больно...', tr:'Ben... sizi duyabiliyorum... ama acıyor... çok acıyor...' },
+  dlg_boss_approach_3: { en:"We're not leaving without you, Glen. We never leave anyone behind!", ru:'Мы не уйдём без тебя, Глен. Мы никого не бросаем!', tr:'Sensiz gitmiyoruz Glen. Kimseyi geride bırakmayız!' },
+  dlg_glen_fight_3:    { en:"You... you have to go. I can feel it taking over...", ru:'Вы... вам нужно уйти. Я чувствую, как оно захватывает...', tr:'Siz... gitmelisiniz. Ele geçirdiğini hissedebiliyorum...' },
+  // Glen sacrifice
+  dlg_glen_sacrifice_1: { en:'Glen suddenly stops. His eyes clear for just a moment.', ru:'Глен внезапно останавливается. Его глаза проясняются на мгновение.', tr:'Glen aniden duruyor. Gözleri sadece bir anlığına açılıyor.' },
+  dlg_glen_sacrifice_2: { en:'I remember now... I remember everything.', ru:'Я помню теперь... Я помню всё.', tr:'Şimdi hatırlıyorum... Her şeyi hatırlıyorum.' },
+  dlg_glen_sacrifice_3: { en:'This place... it feeds on us. It trapped me, and now it wants all of you.', ru:'Это место... питается нами. Оно поймало меня, а теперь хочет всех вас.', tr:'Bu yer... bizden besleniyor. Beni tuzağa düşürdü, şimdi hepinizi istiyor.' },
+  dlg_glen_sacrifice_4: { en:"But I won't let it. Not you guys. Not my friends.", ru:'Но я этого не допущу. Не вас. Не моих друзей.', tr:'Ama izin vermeyeceğim. Sizi değil. Arkadaşlarımı değil.' },
+  dlg_rina_sacrifice:   { en:'Glen, no! What are you doing?!', ru:'Глен, нет! Что ты делаешь?!', tr:'Glen, hayır! Ne yapıyorsun?!' },
+  dlg_glen_sacrifice_5: { en:"Getting you out of here. Tell my family... I'm sorry.", ru:'Выпускаю вас отсюда. Скажите моей семье... простите.', tr:'Sizi buradan çıkarıyorum. Aileme söyleyin... özür dilerim.' },
+  dlg_glen_sacrifice_6: { en:'A blinding light engulfs everything. You feel yourselves being pulled away...', ru:'Ослепляющий свет поглощает всё. Вы чувствуете, как вас уносит...', tr:'Kör edici bir ışık her şeyi yutuyor. Kendinizi uzaklaşırken hissediyorsunuz...' },
+  // Act 3 — Waking up
+  dlg_act3_wake_1:    { en:'You find yourselves in a darker part of the Underdark.', ru:'Вы оказываетесь в более тёмной части Андердарка.', tr:"Kendinizi Underdark'ın daha karanlık bir bölümünde buluyorsunuz." },
+  dlg_act3_wake_2:    { en:"Glen's sacrifice didn't send you home... it sent you deeper.", ru:'Жертва Глена не отправила вас домой... она отправила вас глубже.', tr:"Glen'in fedakarlığı sizi eve göndermedi... daha derine gönderdi." },
+  dlg_hikaru_wake1:   { en:"Glen... he's gone. And we're still trapped here.", ru:'Глен... его нет. И мы всё ещё в ловушке.', tr:'Glen... gitti. Ve biz hala burada tuzaktayız.' },
+  dlg_rina_wake1:     { en:'This place is so beautiful though... maybe we should just... stay a while?', ru:'Но это место такое красивое... может, просто... останемся ненадолго?', tr:'Ama burası çok güzel... belki sadece... biraz kalmalıyız?' },
+  dlg_hikaru_wake2:   { en:"(Beautiful? This place is rotting. Can't they see the corruption everywhere?)", ru:'(Красиво? Это место гниёт. Они не видят повсюду порчу?)', tr:'(Güzel mi? Burası çürüyor. Her yerdeki bozulmayı göremiyorlar mı?)' },
+  dlg_kenji_wake1:    { en:'Chill out, Hikaru. We just need to rest. My head feels... fuzzy.', ru:'Расслабься, Хикару. Нам просто нужно отдохнуть. В голове туман.', tr:'Sakin ol Hikaru. Sadece dinlenmeliyiz. Kafam... bulanık.' },
+  // Warning dialogue
+  dlg_hikaru_warn1:   { en:"Guys, listen to me. This world is not what it looks like. It's a trap!", ru:'Ребята, послушайте. Этот мир не то, чем кажется. Это ловушка!', tr:'Dinleyin beni. Bu dünya göründüğü gibi değil. Bu bir tuzak!' },
+  dlg_rina_dismiss1:  { en:'Hikaru, you\'re overreacting. Everything is fine. Just relax.', ru:'Хикару, ты преувеличиваешь. Всё хорошо. Расслабься.', tr:'Hikaru, abartıyorsun. Her şey yolunda. Sadece rahatla.' },
+  dlg_kenji_dismiss1: { en:"Yeah, man. You've been saying weird stuff since we got here. Take it easy.", ru:'Да, чувак. Ты говоришь странные вещи с тех пор, как мы тут. Успокойся.', tr:'Evet dostum. Buraya geldiğimizden beri garip şeyler söylüyorsun. Sakin ol.' },
+  dlg_hikaru_warn2:   { en:"(They're not listening... the Underdark is already getting to them.)", ru:'(Они не слушают... Андердарк уже добирается до них.)', tr:'(Dinlemiyorlar... Underdark onları çoktan etkiliyor.)' },
+  // Whispers
+  dlg_whisper_1:      { en:'(You hear a faint voice... Glen\'s voice.) "Hikaru... don\'t trust..."', ru:'(Слабый голос... голос Глена.) "Хикару... не верь..."', tr:'(Zayıf bir ses... Glen\'in sesi.) "Hikaru... güvenme..."' },
+  dlg_whisper_2:      { en:'(The whisper fades before you can make sense of it.)', ru:'(Шёпот стихает, прежде чем вы успеваете понять.)', tr:'(Fısıltı anlamlandıramadan kayboluyor.)' },
+  dlg_whisper_3:      { en:'(Glen\'s voice again, clearer.) "...not real... none of it..."', ru:'(Снова голос Глена, чётче.) "...не реально... ничего из этого..."', tr:'(Glen\'in sesi tekrar, daha net.) "...gerçek değil... hiçbiri..."' },
+  // Larry encounter
+  dlg_larry_spot_1:   { en:'Wait... is that someone in the bushes?', ru:'Подождите... это кто-то в кустах?', tr:'Durun... çalılıklarda biri mi var?' },
+  dlg_rina_larry1:    { en:'It looks like... a person! Hey, over here!', ru:'Похоже на... человека! Эй, сюда!', tr:'Bir insana benziyor! Hey, buraya!' },
+  dlg_hikaru_larry1:  { en:'(Something feels wrong. I see it differently than they do...)', ru:'(Что-то не так. Я вижу это не так, как они...)', tr:'(Bir şeyler yanlış. Onu onlardan farklı görüyorum...)' },
+  dlg_larry_1:        { en:"H-hello? Can you help me? I've been lost in here for days...", ru:'П-привет? Вы можете помочь? Я заблудился тут на несколько дней...', tr:'M-merhaba? Bana yardım edebilir misiniz? Günlerdir burada kayıp...' },
+  dlg_kenji_larry1:   { en:"Don't worry, we'll figure this out together. What's your name?", ru:'Не волнуйся, мы разберёмся вместе. Как тебя зовут?', tr:'Merak etme, bunu birlikte çözeriz. Adın ne?' },
+  dlg_larry_2:        { en:"I'm Larry. I came here through a strange light, just like you.", ru:'Я Ларри. Я попал сюда через странный свет, как и вы.', tr:'Ben Larry. Buraya garip bir ışıktan geçerek geldim, sizin gibi.' },
+  dlg_hikaru_larry2:  { en:"(Wait. His eyes... they're not right. This isn't a real person.)", ru:'(Подождите. Его глаза... что-то не так. Это не настоящий человек.)', tr:"(Dur. Gözleri... doğru değil. Bu gerçek bir insan değil.)" },
+  dlg_hikaru_larry3:  { en:"Everyone, get back! That's not a person — it's a trap!", ru:'Все, назад! Это не человек — это ловушка!', tr:'Herkes geri çekilin! Bu bir insan değil — bu bir tuzak!' },
+  dlg_rina_larry2:    { en:"Hikaru, what are you talking about? He's clearly just scared!", ru:'Хикару, о чём ты? Он просто напуган!', tr:'Hikaru, neden bahsediyorsun? Belli ki sadece korkmuş!' },
+  dlg_kenji_larry2:   { en:'Stop being paranoid, man. Not everything here is out to get us.', ru:'Перестань параноить. Не всё здесь хочет нас достать.', tr:'Paranoyak olmayı bırak. Burada her şey bize saldırmıyor.' },
+  dlg_larry_reveal_1: { en:"Larry's face suddenly distorts into a grotesque grin.", ru:'Лицо Ларри искажается в гротескной ухмылке.', tr:"Larry'nin yüzü aniden grotesk bir sırıtışa dönüşüyor." },
+  dlg_larry_reveal_2: { en:"How clever... you can see through it, can't you, little one?", ru:'Как умно... ты видишь сквозь это, не так ли, малыш?', tr:'Ne kadar zeki... görebiliyorsun, değil mi, küçük olan?' },
+  dlg_larry_reveal_3: { en:"But your friends can't. And they're already MINE.", ru:'Но твои друзья — нет. И они уже МОИ.', tr:'Ama arkadaşların göremiyor. Ve onlar zaten BENİM.' },
+  dlg_rina_fight1:    { en:'What\'s happening?! Larry, what are you — AAAH!', ru:'Что происходит?! Ларри, ты что — АААА!', tr:'Ne oluyor?! Larry, sen ne — AAAH!' },
+  dlg_kenji_fight1:   { en:"It's attacking! Watch out!", ru:'Оно атакует! Берегитесь!', tr:'Saldırıyor! Dikkat edin!' },
+  dlg_hikaru_fight1:  { en:'I tried to warn you! We have to fight it!', ru:'Я пытался предупредить! Мы должны сражаться!', tr:'Uyarmaya çalıştım! Onunla savaşmalıyız!' },
+  // After clone fight
+  dlg_clone_defeat_1: { en:'The creature dissolves into dark mist, but the damage is done.', ru:'Существо растворяется в тумане, но ущерб нанесён.', tr:'Yaratık karanlık sise dönüşüyor ama hasar verilmiş.' },
+  dlg_rina_after1:    { en:'I... I feel strange. Hikaru, you were right... something IS wrong here.', ru:'Мне... странно. Хикару, ты был прав... здесь что-то НЕ ТАК.', tr:'Ben... garip hissediyorum. Hikaru, haklıymışsın... burada bir şeyler YANLIŞ.' },
+  dlg_kenji_after1:   { en:"My head... I can't think straight. What was I just doing?", ru:'Моя голова... Не могу ясно думать. Что я делал?', tr:'Kafam... düzgün düşünemiyorum. Az önce ne yapıyordum?' },
+  dlg_hikaru_after1:  { en:'The Underdark has been possessing you. We need to get out. NOW.', ru:'Андердарк вас одержимает. Нам нужно выбраться. СЕЙЧАС.', tr:'Underdark sizi ele geçiriyordu. Çıkmamız lazım. HEMEN.' },
+  dlg_hikaru_after2:  { en:'(Glen\'s whisper: "Find the heart... destroy the heart...")', ru:'(Шёпот Глена: "Найди сердце... уничтожь сердце...")', tr:'(Glen\'in fısıltısı: "Kalbi bul... kalbi yok et...")' },
+  dlg_end3_narration: { en:"The ground shakes. The Underdark knows you're awake now.", ru:'Земля дрожит. Андердарк знает, что вы очнулись.', tr:'Yer sarsılıyor. Underdark uyanık olduğunuzu biliyor.' },
 };
 function t(key) { return STRINGS[key][lang]; }
 
 // ── GAME STATE ──
-let gameState = 'title'; // title, playing, dialogue, transition, ending
+let gameState = 'title'; // title, playing, dialogue, transition, fadein, ending, boss
 let storyFlags = {};
 let currentMap = 'neighborhood';
+let currentAct = 1;
 let objective = '';
 let transitionAlpha = 0;
 let transitionTarget = null;
 let transitionSpawn = null;
 let endingTimer = 0;
+let bossState = null;
+let possessionLevel = 0;
+let returnToBoss = false;
 
 // ── PLAYER ──
 let player = { x: 5*TILE, y: 8*TILE, dir: 0, frame: 0, animTimer: 0, moving: false, char: CHARS.hikaru };
+
+// ── FOLLOWERS ──
+let followers = [
+  { id:'rina', char: CHARS.rina, x: 0, y: 0, dir: 0, frame: 0, animTimer: 0, moving: false, active: false },
+  { id:'kenji', char: CHARS.kenji, x: 0, y: 0, dir: 0, frame: 0, animTimer: 0, moving: false, active: false },
+];
+let trail = [];
+const TRAIL_SPACING = 28;
 
 // ── CAMERA ──
 let cam = { x: 0, y: 0 };
@@ -188,7 +323,10 @@ function handleTouchStart(e) {
       if (hitLangButton(x, y)) return;
       gameState = 'playing'; return;
     }
-    if (gameState === 'ending') return;
+    if (gameState === 'ending') {
+      if (endingTimer >= 8000 && currentAct < 3) { tapAction = true; }
+      return;
+    }
     if (gameState === 'dialogue') { tapAction = true; return; }
     if (x < W * 0.5) {
       if (!joystick.active) {
@@ -244,6 +382,7 @@ window.addEventListener('keydown', e => {
   keys[e.key] = true;
   if (gameState === 'title' && (e.key === ' ' || e.key === 'Enter')) gameState = 'playing';
   if (gameState === 'dialogue' && (e.key === ' ' || e.key === 'Enter')) tapAction = true;
+  if (gameState === 'ending' && endingTimer >= 8000 && currentAct < 3 && (e.key === ' ' || e.key === 'Enter')) tapAction = true;
   if (e.key === ' ' || e.key === 'e' || e.key === 'Enter') actionBtn.pressed = true;
 });
 window.addEventListener('keyup', e => { keys[e.key] = false; });
@@ -253,9 +392,10 @@ const T = {
   GRASS: 0, PATH: 1, WALL: 2, ROOF: 3, DOOR: 4, WATER: 5,
   TREE: 6, ROCK: 7, FENCE: 8, DARK_GRASS: 9, DEAD_TREE: 10,
   PORTAL: 11, FLOOR: 12, WINDOW_WALL: 13, BUSH: 14,
-  FLOWER: 15, BRIDGE: 16, SIGN: 17, LAMP: 18
+  FLOWER: 15, BRIDGE: 16, SIGN: 17, LAMP: 18,
+  CRYSTAL_GRASS: 19, CRYSTAL: 20, DARK_FLOOR: 21, CORRUPT_TREE: 22, VOID: 23
 };
-const WALKABLE = new Set([T.GRASS, T.PATH, T.DOOR, T.DARK_GRASS, T.PORTAL, T.FLOOR, T.BRIDGE, T.FLOWER]);
+const WALKABLE = new Set([T.GRASS, T.PATH, T.DOOR, T.DARK_GRASS, T.PORTAL, T.FLOOR, T.BRIDGE, T.FLOWER, T.CRYSTAL_GRASS, T.DARK_FLOOR]);
 
 // ── MAPS ──
 const MAPS = {};
@@ -270,6 +410,11 @@ MAPS.neighborhood = {
           {who:'rina', text:t('dlg_rina_repeat')},
         ];
         storyFlags.talkedRina = true;
+        followers[0].active = true;
+        followers[0].x = 12*TILE;
+        followers[0].y = 10*TILE;
+        // Seed trail so follower doesn't teleport
+        for (let i = 0; i < TRAIL_SPACING * followers.length + 10; i++) trail.push({x: player.x, y: player.y});
         checkAllTalked();
         return [
           {who:'rina', text:t('dlg_rina_1')},
@@ -285,6 +430,11 @@ MAPS.neighborhood = {
           {who:'kenji', text:t('dlg_kenji_repeat')},
         ];
         storyFlags.talkedKenji = true;
+        followers[1].active = true;
+        followers[1].x = 18*TILE;
+        followers[1].y = 7*TILE;
+        // Seed trail so follower doesn't teleport
+        for (let i = 0; i < TRAIL_SPACING * followers.length + 10; i++) trail.push({x: player.x, y: player.y});
         checkAllTalked();
         return [
           {who:'kenji', text:t('dlg_kenji_1')},
@@ -404,6 +554,192 @@ MAPS.forest = {
   darkness: 0.3,
 };
 
+// ── ACT 2 MAPS ──
+MAPS.underdark_entrance = {
+  w: 30, h: 20,
+  tiles: buildMap_underdark_entrance(),
+  npcs: [
+    { id:'arrive_trigger', x:15*TILE, y:17*TILE, char:null, isObject:true, sprite:'dark_sign',
+      dialogue: () => {
+        if (storyFlags.arrivedUnderdark) return null;
+        storyFlags.arrivedUnderdark = true;
+        return [
+          {who:null, text:t('dlg_arrive_1')},
+          {who:'rina', text:t('dlg_rina_arrive1')},
+          {who:'kenji', text:t('dlg_kenji_arrive1')},
+          {who:'hikaru', text:t('dlg_hikaru_arrive1')},
+          {who:'hikaru', text:t('dlg_hikaru_arrive2')},
+        ];
+      }
+    },
+    { id:'dark_sign', x:20*TILE, y:10*TILE, char:null, isObject:true, sprite:'dark_sign',
+      dialogue: () => {
+        if (storyFlags.foundDarkSign) return [{who:'hikaru', text:t('dlg_hikaru_sign2')}];
+        storyFlags.foundDarkSign = true;
+        checkCanGoDepths();
+        return [
+          {who:null, text:t('dlg_dark_sign_1')},
+          {who:'hikaru', text:t('dlg_hikaru_sign1')},
+          {who:'hikaru', text:t('dlg_hikaru_sign2')},
+        ];
+      }
+    },
+    { id:'fairy', x:10*TILE, y:8*TILE, char:CHARS.fairy, dir:0,
+      dialogue: () => {
+        if (storyFlags.talkedFairy) return [{who:'fairy', text:t('dlg_fairy_repeat')}];
+        storyFlags.talkedFairy = true;
+        checkCanGoDepths();
+        return [
+          {who:'fairy', text:t('dlg_fairy_1')},
+          {who:'fairy', text:t('dlg_fairy_2')},
+          {who:'hikaru', text:t('dlg_hikaru_fairy1')},
+          {who:'rina', text:t('dlg_rina_fairy1')},
+          {who:'fairy', text:t('dlg_fairy_3')},
+        ];
+      }
+    },
+  ],
+  exits: [
+    { x:29, y:9, targetMap:'underdark_depths', spawnX:1*TILE, spawnY:10*TILE, condition: () => storyFlags.canGoDepths },
+    { x:29, y:10, targetMap:'underdark_depths', spawnX:1*TILE, spawnY:11*TILE, condition: () => storyFlags.canGoDepths },
+  ],
+  particles: 'sparkle',
+};
+
+MAPS.underdark_depths = {
+  w: 32, h: 22,
+  tiles: buildMap_underdark_depths(),
+  npcs: [
+    { id:'glen_boss', x:25*TILE, y:11*TILE, char:CHARS.glen_boss, dir:2,
+      dialogue: () => {
+        if (storyFlags.bossDefeated) return null;
+        if (storyFlags.foundGlenBoss) return null;
+        storyFlags.foundGlenBoss = true;
+        objective = t('obj_defeat_glen');
+        return [
+          {who:null, text:t('dlg_glen_found_1')},
+          {who:null, text:t('dlg_glen_found_2')},
+          {who:'rina', text:t('dlg_rina_glen1')},
+          {who:'glen_boss', text:t('dlg_glen_boss_1')},
+          {who:'glen_boss', text:t('dlg_glen_boss_2')},
+          {who:'kenji', text:t('dlg_kenji_glen1')},
+          {who:'hikaru', text:t('dlg_hikaru_glen1')},
+          {who:null, text:'__BOSS_START__'},
+        ];
+      }
+    },
+  ],
+  exits: [
+    { x:0, y:10, targetMap:'underdark_entrance', spawnX:28*TILE, spawnY:9*TILE },
+    { x:0, y:11, targetMap:'underdark_entrance', spawnX:28*TILE, spawnY:10*TILE },
+  ],
+  particles: 'sparkle',
+  darkness: 0.15,
+};
+
+// ── ACT 3 MAPS ──
+MAPS.underdark_ruins = {
+  w: 30, h: 22,
+  tiles: buildMap_underdark_ruins(),
+  npcs: [
+    { id:'wake_trigger', x:5*TILE, y:9*TILE, char:null, isObject:true, sprite:'dark_sign',
+      dialogue: () => {
+        if (storyFlags.wokeUp) return null;
+        storyFlags.wokeUp = true;
+        return [
+          {who:null, text:t('dlg_act3_wake_1')},
+          {who:null, text:t('dlg_act3_wake_2')},
+          {who:'hikaru', text:t('dlg_hikaru_wake1')},
+          {who:'rina', text:t('dlg_rina_wake1')},
+          {who:'hikaru', text:t('dlg_hikaru_wake2')},
+          {who:'kenji', text:t('dlg_kenji_wake1')},
+        ];
+      }
+    },
+    { id:'warn_spot', x:15*TILE, y:11*TILE, char:null, isObject:true, sprite:'dark_sign',
+      dialogue: () => {
+        if (storyFlags.warnedFriends) return [{who:'hikaru', text:t('dlg_hikaru_warn2')}];
+        storyFlags.warnedFriends = true;
+        return [
+          {who:'hikaru', text:t('dlg_hikaru_warn1')},
+          {who:'rina', text:t('dlg_rina_dismiss1')},
+          {who:'kenji', text:t('dlg_kenji_dismiss1')},
+          {who:'hikaru', text:t('dlg_hikaru_warn2')},
+        ];
+      }
+    },
+    { id:'whisper1', x:10*TILE, y:5*TILE, char:null, isObject:true, sprite:'dark_sign',
+      dialogue: () => {
+        if (storyFlags.heardWhisper1) return null;
+        storyFlags.heardWhisper1 = true;
+        objective = t('obj_investigate_whispers');
+        return [{who:'hikaru', text:t('dlg_whisper_1')}, {who:'hikaru', text:t('dlg_whisper_2')}];
+      }
+    },
+    { id:'whisper2', x:22*TILE, y:8*TILE, char:null, isObject:true, sprite:'dark_sign',
+      dialogue: () => {
+        if (storyFlags.heardWhisper2) return null;
+        storyFlags.heardWhisper2 = true;
+        return [{who:'hikaru', text:t('dlg_whisper_3')}];
+      }
+    },
+  ],
+  exits: [
+    { x:29, y:10, targetMap:'underdark_dark', spawnX:1*TILE, spawnY:10*TILE, condition: () => storyFlags.warnedFriends },
+    { x:29, y:11, targetMap:'underdark_dark', spawnX:1*TILE, spawnY:11*TILE, condition: () => storyFlags.warnedFriends },
+  ],
+  particles: 'corruption',
+  darkness: 0.25,
+};
+
+MAPS.underdark_dark = {
+  w: 32, h: 20,
+  tiles: buildMap_underdark_dark(),
+  npcs: [
+    { id:'larry_spot', x:20*TILE, y:10*TILE, char:null, isObject:true, sprite:'dark_sign',
+      dialogue: () => {
+        if (storyFlags.spottedLarry) return null;
+        storyFlags.spottedLarry = true;
+        objective = t('obj_find_larry');
+        return [
+          {who:'hikaru', text:t('dlg_larry_spot_1')},
+          {who:'rina', text:t('dlg_rina_larry1')},
+          {who:'hikaru', text:t('dlg_hikaru_larry1')},
+        ];
+      }
+    },
+    { id:'larry_clone', x:26*TILE, y:10*TILE, char:CHARS.larry_fake, dir:2,
+      dialogue: () => {
+        if (storyFlags.larryRevealed) return null;
+        if (!storyFlags.spottedLarry) return [{who:'hikaru', text:t('dlg_hikaru_larry1')}];
+        storyFlags.larryRevealed = true;
+        return [
+          {who:'larry_fake', text:t('dlg_larry_1')},
+          {who:'kenji', text:t('dlg_kenji_larry1')},
+          {who:'larry_fake', text:t('dlg_larry_2')},
+          {who:'hikaru', text:t('dlg_hikaru_larry2')},
+          {who:'hikaru', text:t('dlg_hikaru_larry3')},
+          {who:'rina', text:t('dlg_rina_larry2')},
+          {who:'kenji', text:t('dlg_kenji_larry2')},
+          {who:null, text:t('dlg_larry_reveal_1')},
+          {who:'larry_fake', text:t('dlg_larry_reveal_2')},
+          {who:'larry_fake', text:t('dlg_larry_reveal_3')},
+          {who:'rina', text:t('dlg_rina_fight1')},
+          {who:'kenji', text:t('dlg_kenji_fight1')},
+          {who:'hikaru', text:t('dlg_hikaru_fight1')},
+          {who:null, text:'__CLONE_FIGHT_START__'},
+        ];
+      }
+    },
+  ],
+  exits: [
+    { x:0, y:10, targetMap:'underdark_ruins', spawnX:28*TILE, spawnY:10*TILE },
+    { x:0, y:11, targetMap:'underdark_ruins', spawnX:28*TILE, spawnY:11*TILE },
+  ],
+  particles: 'corruption',
+  darkness: 0.4,
+};
+
 function checkAllTalked() {
   if (storyFlags.talkedRina && storyFlags.talkedKenji) {
     storyFlags.canGoTown = true;
@@ -414,6 +750,13 @@ function checkTownDone() {
   if (storyFlags.talkedOfficer && storyFlags.talkedShop) {
     storyFlags.canGoForest = true;
     objective = t('obj_go_forest');
+  }
+}
+function checkCanGoDepths() {
+  if (storyFlags.talkedFairy && storyFlags.foundDarkSign) {
+    storyFlags.canGoDepths = true;
+    storyFlags.illusionRevealed = true;
+    objective = t('obj_find_glen');
   }
 }
 
@@ -525,6 +868,97 @@ function buildMap_town() {
   return m;
 }
 
+function buildMap_underdark_entrance() {
+  const m = [];
+  for (let y = 0; y < 20; y++) {
+    m[y] = [];
+    for (let x = 0; x < 30; x++) {
+      let t = T.CRYSTAL_GRASS;
+      if (y === 0 || y === 19) t = T.CRYSTAL;
+      if (x === 0) t = T.CRYSTAL;
+      if (y >= 9 && y <= 11 && x >= 3) t = T.PATH;
+      if ((x===4&&y===4)||(x===8&&y===3)||(x===14&&y===5)||(x===22&&y===4)||(x===26&&y===6)||
+          (x===6&&y===14)||(x===12&&y===16)||(x===18&&y===15)||(x===24&&y===13)||
+          (x===3&&y===8)||(x===25&&y===8)||(x===16&&y===7)) t = T.CRYSTAL;
+      if (x >= 13 && x <= 17 && y >= 13 && y <= 15) t = T.WATER;
+      if (x === 29 && y !== 9 && y !== 10) t = T.CRYSTAL;
+      m[y][x] = t;
+    }
+  }
+  return m;
+}
+
+function buildMap_underdark_depths() {
+  const m = [];
+  for (let y = 0; y < 22; y++) {
+    m[y] = [];
+    for (let x = 0; x < 32; x++) {
+      let t = (x < 16) ? T.CRYSTAL_GRASS : ((x > 20) ? T.DARK_FLOOR : T.CRYSTAL_GRASS);
+      if (y >= 10 && y <= 12 && x <= 20) t = T.PATH;
+      if (x >= 21 && x <= 29 && y >= 7 && y <= 15) t = T.DARK_FLOOR;
+      if (y === 0 || y === 21) t = (x < 16) ? T.CRYSTAL : T.CORRUPT_TREE;
+      if (x === 31) t = T.CORRUPT_TREE;
+      if ((x===3&&y===5)||(x===7&&y===3)||(x===12&&y===6)||(x===5&&y===15)||(x===10&&y===17)||(x===14&&y===14)) t = T.CRYSTAL;
+      if (x === 30 && y >= 5 && y <= 17) t = T.CORRUPT_TREE;
+      if (x === 0 && y !== 10 && y !== 11) t = T.CRYSTAL;
+      m[y][x] = t;
+    }
+  }
+  return m;
+}
+
+function buildMap_underdark_ruins() {
+  const m = [];
+  for (let y = 0; y < 22; y++) {
+    m[y] = [];
+    for (let x = 0; x < 30; x++) {
+      let t = T.DARK_FLOOR;
+      if (y >= 10 && y <= 11 && x >= 2 && x % 3 !== 0) t = T.PATH;
+      if (y === 0 || y === 21) t = T.CORRUPT_TREE;
+      if (x === 0) t = T.CORRUPT_TREE;
+      if ((x===4&&y===3)||(x===8&&y===5)||(x===14&&y===4)||(x===20&&y===3)||(x===26&&y===5)||
+          (x===3&&y===14)||(x===9&&y===16)||(x===16&&y===18)||(x===23&&y===15)||(x===27&&y===17)||
+          (x===6&&y===8)||(x===18&&y===7)||(x===25&&y===9)) t = T.CORRUPT_TREE;
+      if ((x===12&&y===6)||(x===22&&y===4)) t = T.CRYSTAL;
+      if (x === 29 && y !== 10 && y !== 11) t = T.CORRUPT_TREE;
+      m[y][x] = t;
+    }
+  }
+  return m;
+}
+
+function buildMap_underdark_dark() {
+  const m = [];
+  for (let y = 0; y < 20; y++) {
+    m[y] = [];
+    for (let x = 0; x < 32; x++) {
+      let t = T.DARK_FLOOR;
+      if (y === 0 || y === 19) t = T.VOID;
+      if (x === 31) t = T.VOID;
+      if (x === 0 && y !== 10 && y !== 11) t = T.VOID;
+      if ((x===5&&y===3)||(x===10&&y===2)||(x===15&&y===4)||(x===20&&y===3)||
+          (x===3&&y===8)||(x===8&&y===6)||(x===13&&y===7)||
+          (x===4&&y===14)||(x===9&&y===16)||(x===14&&y===17)||(x===19&&y===15)||
+          (x===28&&y===5)||(x===28&&y===15)||(x===7&&y===12)||(x===17&&y===13)) t = T.CORRUPT_TREE;
+      if (x >= 24 && x <= 28 && (y === 8 || y === 12)) t = T.BUSH;
+      if ((x === 24 || x === 28) && y >= 8 && y <= 12) t = T.BUSH;
+      m[y][x] = t;
+    }
+  }
+  return m;
+}
+
+// Glen's footprints in the forest — trail from path to backpack, then toward portal
+const GLEN_FOOTPRINTS = [
+  // From path, heading toward backpack
+  {x:9, y:11.5}, {x:10.5, y:12}, {x:12, y:12.5}, {x:13.5, y:12.8},
+  {x:15, y:12.5}, {x:16.5, y:12.3}, {x:18, y:12.2},
+  // Near backpack, then heading north-east toward portal
+  {x:21, y:11.5}, {x:22, y:10.5}, {x:23, y:9.5},
+  {x:24.5, y:8.5}, {x:25.5, y:7.5}, {x:26.5, y:6.5},
+  {x:27.5, y:5.5}, {x:28.5, y:5},
+];
+
 function buildMap_forest() {
   const m = [];
   for (let y = 0; y < 24; y++) {
@@ -599,6 +1033,24 @@ function initParticles(type) {
         type: 'fog',
       });
     }
+  } else if (type === 'sparkle') {
+    for (let i = 0; i < 30; i++) {
+      particles.push({
+        x: Math.random() * 30 * TILE, y: Math.random() * 20 * TILE,
+        vx: (Math.random() - 0.5) * 0.3, vy: -0.2 - Math.random() * 0.3,
+        size: 2 + Math.random() * 3, alpha: 0.3 + Math.random() * 0.4,
+        phase: Math.random() * Math.PI * 2, type: 'sparkle',
+      });
+    }
+  } else if (type === 'corruption') {
+    for (let i = 0; i < 20; i++) {
+      particles.push({
+        x: Math.random() * 32 * TILE, y: Math.random() * 22 * TILE,
+        vx: (Math.random() - 0.5) * 0.4, vy: 0.1 + Math.random() * 0.2,
+        size: 5 + Math.random() * 8, alpha: 0.15 + Math.random() * 0.1,
+        type: 'corruption',
+      });
+    }
   }
 }
 
@@ -631,6 +1083,28 @@ function drawParticles() {
       ctx.fillStyle = `rgba(30,25,50,${p.alpha})`;
       ctx.beginPath();
       ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.type === 'sparkle') {
+      const st = Date.now() * 0.003;
+      const sa = p.alpha * (0.5 + Math.sin(st + p.phase) * 0.5);
+      ctx.fillStyle = `rgba(238,221,255,${sa})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size * (0.5 + Math.sin(st + p.phase) * 0.3), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = `rgba(255,255,255,${sa * 0.5})`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(sx - p.size, sy); ctx.lineTo(sx + p.size, sy);
+      ctx.moveTo(sx, sy - p.size); ctx.lineTo(sx, sy + p.size);
+      ctx.stroke();
+    } else if (p.type === 'corruption') {
+      ctx.fillStyle = `rgba(106,42,138,${p.alpha})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = `rgba(50,10,70,${p.alpha * 0.6})`;
+      ctx.beginPath();
+      ctx.arc(sx + 2, sy + 2, p.size * 0.6, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -775,18 +1249,20 @@ function drawTile(x, y, type, mapName) {
       ctx.fillRect(sx + TILE - 1, sy, 1, TILE);
       ctx.fillRect(sx, sy + TILE - 1, TILE, 1);
       break;
-    case T.BUSH:
-      ctx.fillStyle = C.grass;
+    case T.BUSH: {
+      const darkBush = mapName === 'underdark_dark' || mapName === 'underdark_ruins';
+      ctx.fillStyle = darkBush ? C.darkFloor : C.grass;
       ctx.fillRect(sx, sy, TILE, TILE);
-      ctx.fillStyle = '#3a8030';
+      ctx.fillStyle = darkBush ? C.corruptLeaf : '#3a8030';
       ctx.beginPath();
       ctx.arc(sx + 16, sy + 18, 10, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#2a6020';
+      ctx.fillStyle = darkBush ? C.corruptBranch : '#2a6020';
       ctx.beginPath();
       ctx.arc(sx + 12, sy + 16, 6, 0, Math.PI * 2);
       ctx.fill();
       break;
+    }
     case T.FLOWER:
       ctx.fillStyle = C.grass;
       ctx.fillRect(sx, sy, TILE, TILE);
@@ -835,6 +1311,100 @@ function drawTile(x, y, type, mapName) {
       ctx.arc(sx + 16, sy + 8, 18, 0, Math.PI * 2);
       ctx.fill();
       break;
+    case T.CRYSTAL_GRASS: {
+      ctx.fillStyle = C.crystalGrass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.crystalGrassDark;
+      if ((x + y) % 3 === 0) { ctx.fillRect(sx+4, sy+8, 2, 6); ctx.fillRect(sx+7, sy+6, 2, 8); }
+      if ((x + y) % 5 === 0) { ctx.fillRect(sx+20, sy+14, 2, 5); }
+      const cgt = Date.now() * 0.002;
+      if ((x + y) % 4 === 0) {
+        ctx.fillStyle = `rgba(180,255,220,${0.08 + Math.sin(cgt + x * 0.5) * 0.04})`;
+        ctx.fillRect(sx, sy, TILE, TILE);
+      }
+      if (storyFlags.illusionRevealed) {
+        ctx.fillStyle = 'rgba(30,10,40,0.3)';
+        ctx.fillRect(sx, sy, TILE, TILE);
+        ctx.strokeStyle = 'rgba(80,20,100,0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx + 2, sy + 16); ctx.lineTo(sx + 30, sy + 12);
+        ctx.stroke();
+      }
+      break;
+    }
+    case T.CRYSTAL: {
+      ctx.fillStyle = C.crystalGrass;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      const crt = Date.now() * 0.003;
+      ctx.fillStyle = C.crystal;
+      ctx.beginPath();
+      ctx.moveTo(sx + 16, sy + 2); ctx.lineTo(sx + 26, sy + 14);
+      ctx.lineTo(sx + 22, sy + 30); ctx.lineTo(sx + 10, sy + 30);
+      ctx.lineTo(sx + 6, sy + 14); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = `rgba(220,200,255,${0.3 + Math.sin(crt + x) * 0.15})`;
+      ctx.beginPath();
+      ctx.moveTo(sx + 14, sy + 6); ctx.lineTo(sx + 20, sy + 10);
+      ctx.lineTo(sx + 18, sy + 20); ctx.lineTo(sx + 12, sy + 18);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = `${C.crystalGlow}${0.1 + Math.sin(crt) * 0.05})`;
+      ctx.beginPath(); ctx.arc(sx + 16, sy + 16, 18, 0, Math.PI * 2); ctx.fill();
+      if (storyFlags.illusionRevealed) {
+        ctx.fillStyle = 'rgba(40,0,60,0.5)';
+        ctx.beginPath(); ctx.arc(sx + 16, sy + 16, 8, 0, Math.PI * 2); ctx.fill();
+      }
+      break;
+    }
+    case T.DARK_FLOOR:
+      ctx.fillStyle = C.darkFloor;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      if ((x + y) % 2 === 0) {
+        ctx.strokeStyle = C.darkFloorDetail; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx + 3, sy + 10); ctx.lineTo(sx + 20, sy + 18);
+        ctx.moveTo(sx + 15, sy + 5); ctx.lineTo(sx + 28, sy + 25);
+        ctx.stroke();
+      }
+      break;
+    case T.CORRUPT_TREE:
+      ctx.fillStyle = C.darkFloor;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      ctx.fillStyle = C.corruptTree;
+      ctx.fillRect(sx + 11, sy + 12, 10, 20);
+      ctx.fillStyle = C.corruptBranch;
+      ctx.beginPath();
+      ctx.moveTo(sx + 8, sy + 14); ctx.lineTo(sx + 2, sy + 4); ctx.lineTo(sx + 6, sy + 2);
+      ctx.moveTo(sx + 24, sy + 10); ctx.lineTo(sx + 30, sy + 2); ctx.lineTo(sx + 28, sy + 0);
+      ctx.fill();
+      ctx.fillStyle = C.corruptLeaf;
+      ctx.beginPath(); ctx.arc(sx + 4, sy + 4, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(sx + 28, sy + 2, 5, 0, Math.PI * 2); ctx.fill();
+      break;
+    case T.VOID: {
+      ctx.fillStyle = C.voidColor;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      const vt = Date.now() * 0.001;
+      if ((x * 7 + y * 13) % 5 === 0) {
+        ctx.fillStyle = `rgba(100,50,150,${0.1 + Math.sin(vt + x + y) * 0.05})`;
+        ctx.beginPath(); ctx.arc(sx + 16, sy + 16, 1, 0, Math.PI * 2); ctx.fill();
+      }
+      break;
+    }
+  }
+}
+
+function drawFootprints() {
+  if (currentMap !== 'forest') return;
+  for (let i = 0; i < GLEN_FOOTPRINTS.length; i++) {
+    const fp = GLEN_FOOTPRINTS[i];
+    const sx = fp.x * TILE - cam.x;
+    const sy = fp.y * TILE - cam.y;
+    if (sx < -TILE || sx > W + TILE || sy < -TILE || sy > H + TILE) continue;
+    const side = (i % 2 === 0) ? -3 : 3;
+    ctx.fillStyle = 'rgba(30,20,10,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(sx + side, sy, 3, 5, 0.2 * (i % 2 ? 1 : -1), 0, Math.PI * 2);
+    ctx.fill();
   }
 }
 
@@ -998,6 +1568,21 @@ function drawObjectSprite(x, y, type) {
       ctx.arc(sx + 16 + Math.cos(a) * r, sy + 16 + Math.sin(a) * r, 2, 0, Math.PI * 2);
       ctx.fill();
     }
+  } else if (type === 'dark_sign') {
+    const dst = Date.now() * 0.002;
+    ctx.fillStyle = `rgba(80,20,100,${0.2 + Math.sin(dst) * 0.1})`;
+    ctx.beginPath();
+    ctx.ellipse(sx + 16, sy + 20, 12, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = `rgba(160,60,200,${0.15 + Math.sin(dst * 1.5) * 0.1})`;
+    ctx.beginPath();
+    ctx.arc(sx + 16, sy + 18, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = `rgba(200,100,255,${0.3 + Math.sin(dst * 2) * 0.15})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(sx + 16, sy + 20, 14, 10, 0, 0, Math.PI * 2);
+    ctx.stroke();
   }
 }
 
@@ -1118,14 +1703,40 @@ function startDialogue(lines) {
 
 function updateDialogue(dt) {
   if (dialogueIndex >= dialogueQueue.length) {
-    gameState = 'playing';
+    gameState = returnToBoss ? 'boss' : 'playing';
+    returnToBoss = false;
     dialogueQueue = [];
     return;
   }
   const line = dialogueQueue[dialogueIndex];
-  if (line.text === '__ENDING__') {
+  if (line.text === '__ENDING__' || line.text === '__ENDING_ACT2__' || line.text === '__ENDING_ACT3__') {
     gameState = 'ending';
     endingTimer = 0;
+    return;
+  }
+  if (line.text === '__BOSS_START__') {
+    gameState = 'boss';
+    initBossFight();
+    return;
+  }
+  if (line.text === '__CLONE_FIGHT_START__') {
+    gameState = 'boss';
+    initCloneFight();
+    return;
+  }
+  if (line.text === '__GLEN_SACRIFICE__') {
+    bossState.phase = 'sacrifice';
+    storyFlags.bossDefeated = true;
+    startDialogue([
+      {who:null, text:t('dlg_glen_sacrifice_1')},
+      {who:'glen_boss', text:t('dlg_glen_sacrifice_2')},
+      {who:'glen_boss', text:t('dlg_glen_sacrifice_3')},
+      {who:'glen_boss', text:t('dlg_glen_sacrifice_4')},
+      {who:'rina', text:t('dlg_rina_sacrifice')},
+      {who:'glen_boss', text:t('dlg_glen_sacrifice_5')},
+      {who:null, text:t('dlg_glen_sacrifice_6')},
+      {who:null, text:'__ENDING_ACT2__'},
+    ]);
     return;
   }
   currentSpeaker = line.who;
@@ -1182,7 +1793,7 @@ function drawDialogue() {
   if (currentSpeaker && char) {
     ctx.fillStyle = char.hair;
     ctx.font = 'bold 15px "Segoe UI", sans-serif';
-    const displayName = currentSpeaker === 'officer' ? t('name_officer') : currentSpeaker === 'shopkeeper' ? t('name_shopkeeper') : char.name;
+    const displayName = currentSpeaker === 'officer' ? t('name_officer') : currentSpeaker === 'shopkeeper' ? t('name_shopkeeper') : currentSpeaker === 'larry_fake' ? t('name_larry') : currentSpeaker === 'glen_boss' ? t('name_glen_boss') : currentSpeaker === 'fairy' ? '???' : char.name;
     ctx.fillText(displayName, textX, boxY + 22);
   } else if (!currentSpeaker) {
     ctx.fillStyle = '#aaa';
@@ -1284,6 +1895,9 @@ function drawUI() {
 function nearbyInteractable() {
   const map = MAPS[currentMap];
   for (let npc of map.npcs) {
+    // Skip NPCs that are now active followers
+    if (npc.id === 'rina' && followers[0].active) continue;
+    if (npc.id === 'kenji' && followers[1].active) continue;
     const dx = (player.x + 16) - (npc.x + 16);
     const dy = (player.y + 16) - (npc.y + 16);
     if (Math.sqrt(dx * dx + dy * dy) < INTERACT_DIST) return npc;
@@ -1299,6 +1913,302 @@ function tryInteract() {
   }
 }
 
+// ── BOSS FIGHT SYSTEM ──
+function initBossFight() {
+  const arenaX = 21 * TILE, arenaY = 7 * TILE;
+  const arenaW = 9 * TILE, arenaH = 9 * TILE;
+  bossState = {
+    type: 'glen',
+    phase: 'fighting', // fighting, approach_dialogue, sacrifice
+    glen: { x: 25 * TILE, y: 11 * TILE },
+    projectiles: [],
+    spawnTimer: 0,
+    spawnInterval: 800,
+    approachCount: 0,
+    invuln: 0,
+    arena: { x: arenaX, y: arenaY, w: arenaW, h: arenaH },
+    timer: 0,
+    patternIndex: 0,
+  };
+  // Position player at arena entrance
+  player.x = 21 * TILE;
+  player.y = 11 * TILE;
+  // Park followers at arena edge
+  for (let i = 0; i < followers.length; i++) {
+    if (followers[i].active) {
+      followers[i].x = 20 * TILE;
+      followers[i].y = (10 + i * 2) * TILE;
+      followers[i].moving = false;
+    }
+  }
+}
+
+function initCloneFight() {
+  bossState = {
+    type: 'clone',
+    phase: 'fighting',
+    clone: { x: 26 * TILE, y: 10 * TILE },
+    projectiles: [],
+    spawnTimer: 0,
+    spawnInterval: 600,
+    invuln: 0,
+    arena: { x: 22 * TILE, y: 6 * TILE, w: 8 * TILE, h: 8 * TILE },
+    timer: 0,
+    surviveTime: 15000,
+    patternIndex: 0,
+  };
+  player.x = 23 * TILE;
+  player.y = 10 * TILE;
+  objective = t('obj_survive_larry');
+}
+
+function spawnBossProjectiles() {
+  const bs = bossState;
+  const bx = bs.type === 'glen' ? bs.glen.x + 16 : bs.clone.x + 16;
+  const by = bs.type === 'glen' ? bs.glen.y + 16 : bs.clone.y + 16;
+  const px = player.x + 16, py = player.y + 16;
+  const pattern = bs.patternIndex % 3;
+  bs.patternIndex++;
+
+  if (pattern === 0) {
+    // Direct shot at player
+    const dx = px - bx, dy = py - by;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    bs.projectiles.push({ x: bx, y: by, vx: dx / dist * 2.5, vy: dy / dist * 2.5, life: 3000 });
+  } else if (pattern === 1) {
+    // Spread of 3
+    const dx = px - bx, dy = py - by;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const baseAngle = Math.atan2(dy, dx);
+    for (let i = -1; i <= 1; i++) {
+      const a = baseAngle + i * 0.3;
+      bs.projectiles.push({ x: bx, y: by, vx: Math.cos(a) * 2.2, vy: Math.sin(a) * 2.2, life: 3000 });
+    }
+  } else {
+    // Ring of 6
+    for (let i = 0; i < 6; i++) {
+      const a = (Math.PI * 2 / 6) * i + bs.timer * 0.001;
+      bs.projectiles.push({ x: bx, y: by, vx: Math.cos(a) * 1.8, vy: Math.sin(a) * 1.8, life: 3000 });
+    }
+  }
+}
+
+function updateBossFight(dt) {
+  const bs = bossState;
+  if (!bs || bs.phase !== 'fighting') return;
+  bs.timer += dt;
+  if (bs.invuln > 0) bs.invuln -= dt;
+
+  // Player movement in boss arena
+  let dx = joystick.dx * SPEED;
+  let dy = joystick.dy * SPEED;
+  player.moving = (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1);
+  if (player.moving) {
+    if (Math.abs(dx) > Math.abs(dy)) player.dir = dx > 0 ? 3 : 2;
+    else player.dir = dy > 0 ? 0 : 1;
+    player.animTimer += ANIM_SPEED;
+    player.frame = player.animTimer;
+    // Constrain to arena
+    let nx = Math.max(bs.arena.x + 4, Math.min(bs.arena.x + bs.arena.w - 28, player.x + dx));
+    let ny = Math.max(bs.arena.y + 4, Math.min(bs.arena.y + bs.arena.h - 28, player.y + dy));
+    player.x = nx;
+    player.y = ny;
+  }
+
+  // Spawn projectiles
+  bs.spawnTimer += dt;
+  if (bs.spawnTimer >= bs.spawnInterval) {
+    bs.spawnTimer = 0;
+    spawnBossProjectiles();
+    // Speed up slightly over time
+    if (bs.spawnInterval > 400) bs.spawnInterval -= 5;
+  }
+
+  // Update projectiles
+  for (let i = bs.projectiles.length - 1; i >= 0; i--) {
+    const p = bs.projectiles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= dt;
+    if (p.life <= 0 || p.x < bs.arena.x - 32 || p.x > bs.arena.x + bs.arena.w + 32 ||
+        p.y < bs.arena.y - 32 || p.y > bs.arena.y + bs.arena.h + 32) {
+      bs.projectiles.splice(i, 1);
+    }
+  }
+
+  // Collision with player
+  if (bs.invuln <= 0) {
+    const px = player.x + 16, py = player.y + 16;
+    for (let p of bs.projectiles) {
+      const ddx = p.x - px, ddy = p.y - py;
+      if (ddx * ddx + ddy * ddy < 18 * 18) {
+        // Hit — push player to arena edge, invuln
+        bs.invuln = 1000;
+        const pushX = bs.arena.x + bs.arena.w / 2 > px ? bs.arena.x + 8 : bs.arena.x + bs.arena.w - 40;
+        const pushY = bs.arena.y + bs.arena.h / 2 > py ? bs.arena.y + 8 : bs.arena.y + bs.arena.h - 40;
+        player.x = pushX;
+        player.y = pushY;
+        bs.projectiles = [];
+        break;
+      }
+    }
+  }
+
+  // Check approach (Glen boss)
+  if (bs.type === 'glen') {
+    const adx = player.x - bs.glen.x, ady = player.y - bs.glen.y;
+    if (adx * adx + ady * ady < 40 * 40) {
+      bs.approachCount++;
+      bs.projectiles = [];
+      // Push player back
+      player.x = bs.arena.x + 8;
+      player.y = bs.arena.y + bs.arena.h / 2;
+      if (bs.approachCount >= 3) {
+        // Sacrifice trigger
+        bs.phase = 'sacrifice';
+        returnToBoss = false;
+        startDialogue([
+          {who:'hikaru', text:t('dlg_boss_approach_3')},
+          {who:'glen_boss', text:t('dlg_glen_fight_3')},
+          {who:null, text:'__GLEN_SACRIFICE__'},
+        ]);
+      } else {
+        // Approach dialogue
+        returnToBoss = true;
+        const approachKey = 'dlg_boss_approach_' + bs.approachCount;
+        const fightKey = 'dlg_glen_fight_' + bs.approachCount;
+        startDialogue([
+          {who:'hikaru', text:t(approachKey)},
+          {who:'glen_boss', text:t(fightKey)},
+        ]);
+      }
+    }
+  }
+
+  // Clone fight — survive timer
+  if (bs.type === 'clone') {
+    if (bs.timer >= bs.surviveTime) {
+      bs.phase = 'done';
+      storyFlags.cloneDefeated = true;
+      startDialogue([
+        {who:null, text:t('dlg_clone_defeat_1')},
+        {who:'rina', text:t('dlg_rina_after1')},
+        {who:'kenji', text:t('dlg_kenji_after1')},
+        {who:'hikaru', text:t('dlg_hikaru_after1')},
+        {who:'hikaru', text:t('dlg_hikaru_after2')},
+        {who:null, text:t('dlg_end3_narration')},
+        {who:null, text:'__ENDING_ACT3__'},
+      ]);
+    }
+  }
+}
+
+function drawBossFight() {
+  const bs = bossState;
+  if (!bs) return;
+  const map = MAPS[currentMap];
+
+  // Camera follows player
+  cam.x = player.x - W / 2 + 16;
+  cam.y = player.y - H / 2 + 16;
+  cam.x = Math.max(0, Math.min(map.w * TILE - W, cam.x));
+  cam.y = Math.max(0, Math.min(map.h * TILE - H, cam.y));
+
+  // Draw tiles
+  const startX = Math.max(0, Math.floor(cam.x / TILE));
+  const startY = Math.max(0, Math.floor(cam.y / TILE));
+  const endX = Math.min(map.w - 1, Math.ceil((cam.x + W) / TILE));
+  const endY = Math.min(map.h - 1, Math.ceil((cam.y + H) / TILE));
+  for (let y = startY; y <= endY; y++) {
+    for (let x = startX; x <= endX; x++) {
+      drawTile(x, y, map.tiles[y][x], currentMap);
+    }
+  }
+
+  // Draw boss with dark aura
+  const bossChar = bs.type === 'glen' ? CHARS.glen_boss : CHARS.larry_fake;
+  const bx = bs.type === 'glen' ? bs.glen.x : bs.clone.x;
+  const by = bs.type === 'glen' ? bs.glen.y : bs.clone.y;
+  const screenBx = bx - cam.x, screenBy = by - cam.y;
+  // Aura
+  const tt = Date.now() * 0.003;
+  ctx.fillStyle = `rgba(120,40,200,${0.15 + Math.sin(tt) * 0.08})`;
+  ctx.beginPath();
+  ctx.arc(screenBx + 16, screenBy + 16, 30 + Math.sin(tt * 2) * 5, 0, Math.PI * 2);
+  ctx.fill();
+  drawCharSprite(bx, by, bossChar, 2, 0, false);
+
+  // Draw followers static at edge
+  for (let f of followers) {
+    if (f.active) {
+      drawCharSprite(f.x, f.y, f.char, f.dir, 0, false);
+    }
+  }
+
+  // Draw player
+  if (bs.invuln > 0 && Math.floor(bs.invuln / 100) % 2 === 0) {
+    ctx.globalAlpha = 0.4;
+  }
+  drawCharSprite(player.x, player.y, player.char, player.dir, player.frame, false);
+  ctx.globalAlpha = 1;
+
+  // Draw projectiles
+  for (let p of bs.projectiles) {
+    const sx = p.x - cam.x, sy = p.y - cam.y;
+    ctx.fillStyle = 'rgba(160,60,255,0.8)';
+    ctx.beginPath();
+    ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(220,160,255,0.5)';
+    ctx.beginPath();
+    ctx.arc(sx, sy, 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Particles
+  drawParticles();
+
+  // Darkness overlay
+  if (map.darkness) {
+    ctx.fillStyle = `rgba(10,5,25,${map.darkness})`;
+    ctx.fillRect(0, 0, W, H);
+    const px = player.x + 16 - cam.x, py = player.y + 16 - cam.y;
+    const grad = ctx.createRadialGradient(px, py, 30, px, py, 180);
+    grad.addColorStop(0, 'rgba(10,5,25,0.35)');
+    grad.addColorStop(1, 'rgba(10,5,25,0)');
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // Hit flash overlay
+  if (bs.invuln > 800) {
+    ctx.fillStyle = `rgba(200,50,50,${(bs.invuln - 800) / 200 * 0.3})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Clone fight timer bar
+  if (bs.type === 'clone' && bs.phase === 'fighting') {
+    const progress = Math.min(bs.timer / bs.surviveTime, 1);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(W / 2 - 80, 16, 160, 12);
+    ctx.fillStyle = `rgb(${Math.floor(200 - progress * 150)},${Math.floor(50 + progress * 150)},80)`;
+    ctx.fillRect(W / 2 - 79, 17, 158 * progress, 10);
+    ctx.strokeStyle = 'rgba(200,160,255,0.6)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(W / 2 - 80, 16, 160, 12);
+  }
+
+  // UI overlay
+  drawUI();
+
+  // Dialogue on top if active
+  if (gameState === 'dialogue') {
+    drawDialogue();
+  }
+}
+
 // ── GAME LOOP ──
 let lastTime = 0;
 function gameLoop(time) {
@@ -1306,7 +2216,7 @@ function gameLoop(time) {
   lastTime = time;
 
   // Keyboard input
-  if (gameState === 'playing') {
+  if (gameState === 'playing' || gameState === 'boss') {
     let kdx = 0, kdy = 0;
     if (keys['ArrowLeft'] || keys['a']) kdx = -1;
     if (keys['ArrowRight'] || keys['d']) kdx = 1;
@@ -1333,12 +2243,28 @@ function update(dt) {
       currentMap = transitionTarget;
       player.x = transitionSpawn.x;
       player.y = transitionSpawn.y;
+      // Reposition active followers near spawn
+      for (let i = 0; i < followers.length; i++) {
+        if (followers[i].active) {
+          followers[i].x = transitionSpawn.x;
+          followers[i].y = transitionSpawn.y + (i + 1) * TILE;
+          followers[i].dir = player.dir;
+          followers[i].moving = false;
+        }
+      }
+      // Reseed trail
+      trail = [];
+      for (let i = 0; i < TRAIL_SPACING * followers.length + 10; i++) trail.push({x: player.x, y: player.y});
       initParticles(MAPS[currentMap].particles);
       transitionAlpha = 1;
       // Set objective for new map
       if (currentMap === 'town' && !storyFlags.talkedOfficer) objective = t('obj_investigate_town');
       if (currentMap === 'forest') objective = t('obj_search_forest');
       if (currentMap === 'neighborhood' && storyFlags.canGoTown) objective = t('obj_go_town');
+      if (currentMap === 'underdark_entrance') objective = t('obj_explore_underdark');
+      if (currentMap === 'underdark_depths') objective = t('obj_find_glen');
+      if (currentMap === 'underdark_ruins') objective = t('obj_follow_friends');
+      if (currentMap === 'underdark_dark') objective = t('obj_investigate_whispers');
     }
     if (transitionAlpha >= 1) {
       // Fade back in
@@ -1360,6 +2286,28 @@ function update(dt) {
   }
   if (gameState === 'ending') {
     endingTimer += dt;
+    if (tapAction && endingTimer >= 8000 && currentAct < 3) {
+      tapAction = false;
+      if (currentAct === 1) {
+        currentAct = 2;
+        transitionTarget = 'underdark_entrance';
+        transitionSpawn = { x: 15 * TILE, y: 18 * TILE };
+        objective = t('obj_explore_underdark');
+      } else if (currentAct === 2) {
+        currentAct = 3;
+        transitionTarget = 'underdark_ruins';
+        transitionSpawn = { x: 5 * TILE, y: 10 * TILE };
+        objective = t('obj_follow_friends');
+      }
+      endingTimer = 0;
+      transitionAlpha = 0;
+      gameState = 'transition';
+    }
+    return;
+  }
+  if (gameState === 'boss') {
+    updateBossFight(dt);
+    updateParticles(MAPS[currentMap]);
     return;
   }
   if (gameState !== 'playing') return;
@@ -1416,6 +2364,43 @@ function update(dt) {
     if (canMoveY) player.y = ny;
   }
 
+  // Record player position in trail
+  trail.push({x: player.x, y: player.y});
+  const maxTrail = TRAIL_SPACING * followers.length + 10;
+  if (trail.length > maxTrail) trail.splice(0, trail.length - maxTrail);
+
+  // Update followers from trail
+  for (let i = 0; i < followers.length; i++) {
+    const f = followers[i];
+    if (!f.active) continue;
+    // Possession stalling — occasional freeze in Act 3
+    if (possessionLevel > 0.3 && Math.random() < possessionLevel * 0.04) {
+      f.moving = false;
+      continue;
+    }
+    const trailIdx = trail.length - 1 - TRAIL_SPACING * (i + 1);
+    if (trailIdx >= 0) {
+      const target = trail[trailIdx];
+      const fdx = target.x - f.x;
+      const fdy = target.y - f.y;
+      const dist = Math.sqrt(fdx * fdx + fdy * fdy);
+      if (dist > 1) {
+        f.x = target.x;
+        f.y = target.y;
+        f.moving = true;
+        f.animTimer += ANIM_SPEED;
+        f.frame = f.animTimer;
+        if (Math.abs(fdx) > Math.abs(fdy)) {
+          f.dir = fdx > 0 ? 3 : 2;
+        } else {
+          f.dir = fdy > 0 ? 0 : 1;
+        }
+      } else {
+        f.moving = false;
+      }
+    }
+  }
+
   // Check map exits
   const px = Math.floor((player.x + 16) / TILE);
   const py = Math.floor((player.y + 20) / TILE);
@@ -1440,6 +2425,11 @@ function update(dt) {
   // Interact
   if (actionBtn.pressed) {
     tryInteract();
+  }
+
+  // Possession increase in Act 3
+  if (currentAct === 3) {
+    possessionLevel = Math.min(1, possessionLevel + dt * 0.00003);
   }
 
   // Camera
@@ -1467,6 +2457,11 @@ function draw() {
     return;
   }
 
+  if (gameState === 'boss') {
+    drawBossFight();
+    return;
+  }
+
   const map = MAPS[currentMap];
 
   // Draw tiles
@@ -1481,17 +2476,36 @@ function draw() {
     }
   }
 
+  // Glen's footprints (forest only, on ground under entities)
+  drawFootprints();
+
   // Draw entities sorted by Y
   let entities = [];
   entities.push({ y: player.y, type: 'player' });
   for (let npc of map.npcs) {
+    // Skip NPCs that are now active followers
+    if (npc.id === 'rina' && followers[0].active) continue;
+    if (npc.id === 'kenji' && followers[1].active) continue;
     entities.push({ y: npc.y, type: 'npc', npc });
+  }
+  for (let f of followers) {
+    if (f.active) entities.push({ y: f.y, type: 'follower', follower: f });
   }
   entities.sort((a, b) => a.y - b.y);
 
   for (let e of entities) {
     if (e.type === 'player') {
       drawCharSprite(player.x, player.y, player.char, player.dir, player.frame, false);
+    } else if (e.type === 'follower') {
+      drawCharSprite(e.follower.x, e.follower.y, e.follower.char, e.follower.dir, e.follower.frame, false);
+      // Possession dark overlay in Act 3
+      if (possessionLevel > 0.1) {
+        const fx = e.follower.x - cam.x + 16, fy = e.follower.y - cam.y + 20;
+        ctx.fillStyle = `rgba(80,20,120,${possessionLevel * 0.35})`;
+        ctx.beginPath();
+        ctx.ellipse(fx, fy, 12, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
     } else if (e.npc.isObject) {
       drawObjectSprite(e.npc.x, e.npc.y, e.npc.sprite);
     } else {
@@ -1575,7 +2589,8 @@ function drawTitle() {
   // Subtitle
   ctx.fillStyle = '#c8b8ff';
   ctx.font = '18px "Segoe UI", sans-serif';
-  ctx.fillText(t('title_subtitle'), W/2, H * 0.45);
+  const subtitleKey = currentAct === 1 ? 'title_subtitle' : currentAct === 2 ? 'title_subtitle_act2' : 'title_subtitle_act3';
+  ctx.fillText(t(subtitleKey), W/2, H * 0.45);
 
   // Characters silhouettes
   const chars = [CHARS.hikaru, CHARS.rina, CHARS.kenji];
@@ -1626,10 +2641,11 @@ function drawTitle() {
 function drawEnding() {
   const progress = Math.min(endingTimer / 8000, 1);
 
-  // Background
+  // Background — darker for later acts
   const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#0a0520');
-  grad.addColorStop(1, '#2a1050');
+  if (currentAct === 1) { grad.addColorStop(0, '#0a0520'); grad.addColorStop(1, '#2a1050'); }
+  else if (currentAct === 2) { grad.addColorStop(0, '#200a10'); grad.addColorStop(1, '#100520'); }
+  else { grad.addColorStop(0, '#0a0008'); grad.addColorStop(1, '#050005'); }
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
@@ -1644,31 +2660,38 @@ function drawEnding() {
     ctx.fill();
   }
 
+  // Select text keys based on act
+  const keys = currentAct === 1
+    ? { aw:'end_awaits', l1:'end_line1', l2:'end_line2', ac:'end_act', co:'end_cont' }
+    : currentAct === 2
+    ? { aw:'end2_sacrifice', l1:'end2_line1', l2:'end2_line2', ac:'end2_act', co:'end2_cont' }
+    : { aw:'end3_reveal', l1:'end3_line1', l2:'end3_line2', ac:'end3_act', co:'end3_cont' };
+
   ctx.textAlign = 'center';
 
   if (progress > 0.1) {
     const alpha = Math.min((progress - 0.1) * 3, 1);
     ctx.fillStyle = `rgba(255,255,255,${alpha})`;
     ctx.font = 'bold 28px "Segoe UI", sans-serif';
-    ctx.fillText(t('end_awaits'), W/2, H * 0.35);
+    ctx.fillText(t(keys.aw), W/2, H * 0.35);
   }
 
   if (progress > 0.35) {
     const alpha = Math.min((progress - 0.35) * 3, 1);
     ctx.fillStyle = `rgba(200,180,255,${alpha})`;
     ctx.font = '16px "Segoe UI", sans-serif';
-    ctx.fillText(t('end_line1'), W/2, H * 0.45);
-    ctx.fillText(t('end_line2'), W/2, H * 0.50);
+    ctx.fillText(t(keys.l1), W/2, H * 0.45);
+    ctx.fillText(t(keys.l2), W/2, H * 0.50);
   }
 
   if (progress > 0.55) {
     const alpha = Math.min((progress - 0.55) * 3, 1);
-    const chars = [CHARS.hikaru, CHARS.rina, CHARS.kenji];
+    const portraitChars = currentAct === 2 ? [CHARS.glen] : [CHARS.hikaru, CHARS.rina, CHARS.kenji];
     const portraitSize = 55;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < portraitChars.length; i++) {
       ctx.globalAlpha = alpha;
-      const px = W/2 + (i - 1) * 80;
-      drawPortrait(chars[i], px - portraitSize/2, H * 0.56, portraitSize);
+      const px = W/2 + (i - (portraitChars.length-1)/2) * 80;
+      drawPortrait(portraitChars[i], px - portraitSize/2, H * 0.56, portraitSize);
     }
     ctx.globalAlpha = 1;
   }
@@ -1677,10 +2700,18 @@ function drawEnding() {
     const alpha = Math.min((progress - 0.75) * 3, 1);
     ctx.fillStyle = `rgba(255,200,100,${alpha})`;
     ctx.font = 'bold 22px "Segoe UI", sans-serif';
-    ctx.fillText(t('end_act'), W/2, H * 0.80);
+    ctx.fillText(t(keys.ac), W/2, H * 0.80);
     ctx.fillStyle = `rgba(200,180,255,${alpha * 0.7})`;
     ctx.font = '14px "Segoe UI", sans-serif';
-    ctx.fillText(t('end_cont'), W/2, H * 0.86);
+    ctx.fillText(t(keys.co), W/2, H * 0.86);
+  }
+
+  // Tap to continue for Acts 1 and 2
+  if (progress >= 1 && currentAct < 3) {
+    const blinkAlpha = 0.4 + Math.sin(Date.now() * 0.004) * 0.3;
+    ctx.fillStyle = `rgba(200,180,255,${blinkAlpha})`;
+    ctx.font = '14px "Segoe UI", sans-serif';
+    ctx.fillText(t('ui_tap_continue'), W/2, H * 0.93);
   }
 
   ctx.textAlign = 'start';
@@ -1692,6 +2723,9 @@ function init() {
   player.y = 8 * TILE;
   currentMap = 'neighborhood';
   objective = t('obj_talk_friends');
+  // Seed trail for followers
+  trail = [];
+  for (let i = 0; i < TRAIL_SPACING * followers.length + 10; i++) trail.push({x: player.x, y: player.y});
   initParticles(MAPS[currentMap].particles);
   requestAnimationFrame(gameLoop);
 }
