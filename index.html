@@ -61,11 +61,92 @@ const CHARS = {
   shopkeeper:{ name:'Mrs. Yamada', hair:'#996', hairStyle:'bun', skin:'#f0d0a0', shirt:'#aa6633', pants:'#556', eyes:'#553' },
 };
 
+// ── LANGUAGE ──
+let lang = localStorage.getItem('underdark-lang') || 'en';
+const STRINGS = {
+  // UI
+  ui_objective:  { en:'OBJECTIVE', ru:'ЦЕЛЬ' },
+  ui_talk:       { en:'Talk', ru:'Говорить' },
+  // Objectives
+  obj_talk_friends: { en:'Talk to your friends', ru:'Поговори с друзьями' },
+  obj_go_town:      { en:'Head east to the town center →', ru:'Иди на восток к центру города →' },
+  obj_go_forest:    { en:'Follow the clue to the old forest →', ru:'Следуй за уликой к старому лесу →' },
+  obj_find_light:   { en:'Find the source of the strange light', ru:'Найди источник странного света' },
+  obj_investigate_town: { en:'Investigate the town for clues', ru:'Ищи улики в городе' },
+  obj_search_forest:    { en:'Search the forest for Glen', ru:'Ищи Глена в лесу' },
+  // Title screen
+  title_name:     { en:'UNDERDARK', ru:'UNDERDARK' },
+  title_subtitle: { en:'Act 1: The Disappearance', ru:'Акт 1: Исчезновение' },
+  title_tap:      { en:'Tap to Start', ru:'Нажми, чтобы начать' },
+  title_credit:   { en:'A School Project', ru:'Школьный проект' },
+  // Ending screen
+  end_awaits: { en:'The Underdark awaits...', ru:'Андердарк ждёт...' },
+  end_line1:  { en:'Three friends step into the unknown', ru:'Трое друзей шагают в неизвестность' },
+  end_line2:  { en:'to save the one they lost.', ru:'чтобы спасти того, кого потеряли.' },
+  end_act:    { en:'End of Act 1', ru:'Конец 1 Акта' },
+  end_cont:   { en:'To be continued...', ru:'Продолжение следует...' },
+  // Character names
+  name_officer:    { en:'Officer Tanaka', ru:'Офицер Танака' },
+  name_shopkeeper: { en:'Mrs. Yamada', ru:'Госпожа Ямада' },
+  // Dialogue — Neighborhood: Rina
+  dlg_rina_repeat:  { en:"We should check the town center. Maybe someone saw Glen.", ru:"Нам нужно проверить центр города. Может, кто-то видел Глена." },
+  dlg_rina_1:       { en:"Hikaru! Have you heard? Glen has been missing for three days now...", ru:"Хикару! Ты слышал? Глен пропал уже три дня назад..." },
+  dlg_hikaru_r1:    { en:"I know. The police said they couldn't find any traces.", ru:"Я знаю. Полиция сказала, что не нашла никаких следов." },
+  dlg_rina_2:       { en:"They barely even tried! We have to do something ourselves.", ru:"Они даже толком не пытались! Мы должны сами что-то сделать." },
+  dlg_hikaru_r2:    { en:"You're right. Let's gather the group and investigate.", ru:"Ты права. Давай соберём группу и расследуем." },
+  // Dialogue — Neighborhood: Kenji
+  dlg_kenji_repeat: { en:"I'll check around here some more. You guys go to town.", ru:"Я ещё поищу тут. А вы идите в город." },
+  dlg_kenji_1:      { en:"Yo, Hikaru. This is messed up. Glen wouldn't just vanish like that.", ru:"Йо, Хикару. Это ненормально. Глен не мог просто так исчезнуть." },
+  dlg_hikaru_k1:    { en:"Did he say anything to you before he disappeared?", ru:"Он тебе что-нибудь говорил перед тем, как исчез?" },
+  dlg_kenji_2:      { en:"Last thing he told me was he found some 'interesting place' near the old forest...", ru:"Последнее, что он мне сказал — он нашёл какое-то «интересное место» у старого леса..." },
+  dlg_kenji_3:      { en:"I didn't think much of it then. But now...", ru:"Тогда я не придал этому значения. Но сейчас..." },
+  dlg_hikaru_k2:    { en:"The old forest? That's worth investigating.", ru:"Старый лес? Стоит это расследовать." },
+  // Dialogue — Town: Officer
+  dlg_officer_repeat: { en:"I already told you, we've done everything we can. Go home, kids.", ru:"Я уже сказал, мы сделали всё, что могли. Идите домой, ребята." },
+  dlg_hikaru_o1:      { en:"Officer, about our friend Glen who went missing...", ru:"Офицер, насчёт нашего друга Глена, который пропал..." },
+  dlg_officer_1:      { en:"Ah, the Tanaka boy. Look, we searched the area thoroughly.", ru:"А, мальчик Танака. Послушайте, мы тщательно обыскали район." },
+  dlg_officer_2:      { en:"No signs of foul play. He probably just ran away from home. It happens.", ru:"Никаких признаков преступления. Скорее всего, он просто сбежал из дома. Такое бывает." },
+  dlg_rina_o1:        { en:"That's not like Glen at all! He wouldn't just leave!", ru:"Это совсем не похоже на Глена! Он бы просто так не ушёл!" },
+  dlg_officer_3:      { en:"I understand your concern, but there's nothing more we can do.", ru:"Я понимаю вашу обеспокоенность, но мы больше ничего не можем сделать." },
+  dlg_hikaru_o2:      { en:"(The police are useless... We'll have to find him ourselves.)", ru:"(Полиция бесполезна... Придётся искать его самим.)" },
+  // Dialogue — Town: Shopkeeper
+  dlg_shop_repeat:    { en:"Please be careful near that forest. Strange things happen there at night.", ru:"Пожалуйста, будьте осторожны рядом с тем лесом. Там по ночам происходят странные вещи." },
+  dlg_hikaru_s1:      { en:"Excuse me, have you seen a boy with green hair around here recently?", ru:"Простите, вы не видели тут недавно мальчика с зелёными волосами?" },
+  dlg_shop_1:         { en:"Green hair? Oh my... yes, I think I saw someone like that.", ru:"Зелёные волосы? О боже... да, кажется, я видела кого-то такого." },
+  dlg_shop_2:         { en:"It was late at night, about three days ago. He was heading toward the old forest path.", ru:"Это было поздно ночью, примерно три дня назад. Он шёл по тропинке к старому лесу." },
+  dlg_hikaru_s2:      { en:"The old forest! That's what Kenji mentioned too!", ru:"Старый лес! Кэндзи тоже об этом говорил!" },
+  dlg_shop_3:         { en:"You're not thinking of going there, are you? That place gives me the creeps.", ru:"Вы же не собираетесь туда идти? Это место вселяет в меня жуть." },
+  dlg_shop_4:         { en:"People say they hear strange sounds coming from deep in those woods...", ru:"Люди говорят, что слышат странные звуки из глубины тех лесов..." },
+  dlg_hikaru_s3:      { en:"We have to find our friend. Thank you for the information!", ru:"Мы должны найти нашего друга. Спасибо за информацию!" },
+  // Dialogue — Forest: Backpack
+  dlg_backpack_repeat:   { en:"Glen's backpack... He was definitely here.", ru:"Рюкзак Глена... Он точно был здесь." },
+  dlg_backpack_1:        { en:"You found a backpack on the ground.", ru:"Вы нашли рюкзак на земле." },
+  dlg_hikaru_b1:         { en:"Wait... this is Glen's backpack!", ru:"Подожди... это рюкзак Глена!" },
+  dlg_rina_b1:           { en:"Oh no... He was here. But where did he go?", ru:"О нет... Он был здесь. Но куда он делся?" },
+  dlg_kenji_b1:          { en:"Look, there's a faint trail leading deeper into the forest...", ru:"Смотрите, здесь слабый след, ведущий глубже в лес..." },
+  dlg_hikaru_b2:         { en:"And... do you see that? There's a strange light coming from further in.", ru:"И... вы это видите? Оттуда, из глубины, идёт странный свет." },
+  dlg_rina_b2:           { en:"I don't see anything...", ru:"Я ничего не вижу..." },
+  dlg_hikaru_b3:         { en:"(Am I the only one who can see it? Something feels very wrong...)", ru:"(Неужели только я это вижу? Что-то здесь очень не так...)" },
+  // Dialogue — Forest: Portal
+  dlg_portal_not_ready:  { en:"There's something strange about this area... Let me look around more first.", ru:"В этом месте что-то странное... Давай сначала осмотримся получше." },
+  dlg_portal_1:          { en:"A swirling void of purple energy pulses before you.", ru:"Перед вами пульсирует вихрь фиолетовой энергии." },
+  dlg_hikaru_p1:         { en:"What... what is this?!", ru:"Что... что это?!" },
+  dlg_rina_p1:           { en:"Hikaru, what are you staring at? I just see old trees...", ru:"Хикару, на что ты смотришь? Я вижу только старые деревья..." },
+  dlg_kenji_p1:          { en:"Yeah man, there's nothing there.", ru:"Да, чувак, там ничего нет." },
+  dlg_hikaru_p2:         { en:"You can't see it?! There's a massive portal right here!", ru:"Вы не видите?! Тут огромный портал!" },
+  dlg_hikaru_p3:         { en:"Glen must have gone through here. I... I can feel it.", ru:"Глен, должно быть, прошёл сюда. Я... я чувствую это." },
+  dlg_rina_p2:           { en:"Hikaru, you're scaring me...", ru:"Хикару, ты меня пугаешь..." },
+  dlg_hikaru_p4:         { en:"I'm going in. Glen needs our help.", ru:"Я иду туда. Глену нужна наша помощь." },
+  dlg_kenji_p2:          { en:"If you're going, we're going with you. We're not leaving anyone behind.", ru:"Если ты идёшь, мы идём с тобой. Мы никого не бросим." },
+  dlg_portal_2:          { en:"The three of you step forward into the unknown...", ru:"Вы втроём шагаете в неизвестность..." },
+};
+function t(key) { return STRINGS[key][lang]; }
+
 // ── GAME STATE ──
 let gameState = 'title'; // title, playing, dialogue, transition, ending
 let storyFlags = {};
 let currentMap = 'neighborhood';
-let objective = 'Talk to your friends';
+let objective = '';
 let transitionAlpha = 0;
 let transitionTarget = null;
 let transitionSpawn = null;
@@ -82,11 +163,31 @@ let joystick = { active: false, id: null, sx: 0, sy: 0, cx: 0, cy: 0, dx: 0, dy:
 let actionBtn = { active: false, pressed: false, id: null };
 let tapAction = false;
 
+function hitLangButton(px, py) {
+  const btnW = 44, btnH = 28, gap = 8;
+  const totalW = btnW * 2 + gap;
+  const lx = W/2 - totalW/2, ly = 14;
+  const langs = ['en', 'ru'];
+  for (let i = 0; i < 2; i++) {
+    const bx = lx + i * (btnW + gap);
+    if (px >= bx && px <= bx + btnW && py >= ly && py <= ly + btnH) {
+      lang = langs[i];
+      localStorage.setItem('underdark-lang', lang);
+      objective = t('obj_talk_friends');
+      return true;
+    }
+  }
+  return false;
+}
+
 function handleTouchStart(e) {
   e.preventDefault();
   for (let t of e.changedTouches) {
     const x = t.clientX, y = t.clientY;
-    if (gameState === 'title') { gameState = 'playing'; return; }
+    if (gameState === 'title') {
+      if (hitLangButton(x, y)) return;
+      gameState = 'playing'; return;
+    }
     if (gameState === 'ending') return;
     if (gameState === 'dialogue') { tapAction = true; return; }
     if (x < W * 0.5) {
@@ -129,11 +230,19 @@ canvas.addEventListener('touchmove', handleTouchMove, {passive:false});
 canvas.addEventListener('touchend', handleTouchEnd, {passive:false});
 canvas.addEventListener('touchcancel', handleTouchEnd, {passive:false});
 
+// Mouse click (for language buttons and desktop title start)
+canvas.addEventListener('click', e => {
+  if (gameState === 'title') {
+    if (hitLangButton(e.clientX, e.clientY)) return;
+    gameState = 'playing';
+  }
+});
+
 // Keyboard fallback
 let keys = {};
 window.addEventListener('keydown', e => {
   keys[e.key] = true;
-  if (gameState === 'title') gameState = 'playing';
+  if (gameState === 'title' && (e.key === ' ' || e.key === 'Enter')) gameState = 'playing';
   if (gameState === 'dialogue' && (e.key === ' ' || e.key === 'Enter')) tapAction = true;
   if (e.key === ' ' || e.key === 'e' || e.key === 'Enter') actionBtn.pressed = true;
 });
@@ -158,31 +267,31 @@ MAPS.neighborhood = {
     { id:'rina', x:12*TILE, y:10*TILE, char:CHARS.rina, dir:0,
       dialogue: () => {
         if (storyFlags.talkedRina) return [
-          {who:'rina', text:"We should check the town center. Maybe someone saw Glen."},
+          {who:'rina', text:t('dlg_rina_repeat')},
         ];
         storyFlags.talkedRina = true;
         checkAllTalked();
         return [
-          {who:'rina', text:"Hikaru! Have you heard? Glen has been missing for three days now..."},
-          {who:'hikaru', text:"I know. The police said they couldn't find any traces."},
-          {who:'rina', text:"They barely even tried! We have to do something ourselves."},
-          {who:'hikaru', text:"You're right. Let's gather the group and investigate."},
+          {who:'rina', text:t('dlg_rina_1')},
+          {who:'hikaru', text:t('dlg_hikaru_r1')},
+          {who:'rina', text:t('dlg_rina_2')},
+          {who:'hikaru', text:t('dlg_hikaru_r2')},
         ];
       }
     },
     { id:'kenji', x:18*TILE, y:7*TILE, char:CHARS.kenji, dir:2,
       dialogue: () => {
         if (storyFlags.talkedKenji) return [
-          {who:'kenji', text:"I'll check around here some more. You guys go to town."},
+          {who:'kenji', text:t('dlg_kenji_repeat')},
         ];
         storyFlags.talkedKenji = true;
         checkAllTalked();
         return [
-          {who:'kenji', text:"Yo, Hikaru. This is messed up. Glen wouldn't just vanish like that."},
-          {who:'hikaru', text:"Did he say anything to you before he disappeared?"},
-          {who:'kenji', text:"Last thing he told me was he found some 'interesting place' near the old forest..."},
-          {who:'kenji', text:"I didn't think much of it then. But now..."},
-          {who:'hikaru', text:"The old forest? That's worth investigating."},
+          {who:'kenji', text:t('dlg_kenji_1')},
+          {who:'hikaru', text:t('dlg_hikaru_k1')},
+          {who:'kenji', text:t('dlg_kenji_2')},
+          {who:'kenji', text:t('dlg_kenji_3')},
+          {who:'hikaru', text:t('dlg_hikaru_k2')},
         ];
       }
     },
@@ -201,35 +310,35 @@ MAPS.town = {
     { id:'officer', x:22*TILE, y:6*TILE, char:CHARS.officer, dir:2,
       dialogue: () => {
         if (storyFlags.talkedOfficer) return [
-          {who:'officer', text:"I already told you, we've done everything we can. Go home, kids."},
+          {who:'officer', text:t('dlg_officer_repeat')},
         ];
         storyFlags.talkedOfficer = true;
         checkTownDone();
         return [
-          {who:'hikaru', text:"Officer, about our friend Glen who went missing..."},
-          {who:'officer', text:"Ah, the Tanaka boy. Look, we searched the area thoroughly."},
-          {who:'officer', text:"No signs of foul play. He probably just ran away from home. It happens."},
-          {who:'rina', text:"That's not like Glen at all! He wouldn't just leave!"},
-          {who:'officer', text:"I understand your concern, but there's nothing more we can do."},
-          {who:'hikaru', text:"(The police are useless... We'll have to find him ourselves.)"},
+          {who:'hikaru', text:t('dlg_hikaru_o1')},
+          {who:'officer', text:t('dlg_officer_1')},
+          {who:'officer', text:t('dlg_officer_2')},
+          {who:'rina', text:t('dlg_rina_o1')},
+          {who:'officer', text:t('dlg_officer_3')},
+          {who:'hikaru', text:t('dlg_hikaru_o2')},
         ];
       }
     },
     { id:'shopkeeper', x:10*TILE, y:12*TILE, char:CHARS.shopkeeper, dir:0,
       dialogue: () => {
         if (storyFlags.talkedShop) return [
-          {who:'shopkeeper', text:"Please be careful near that forest. Strange things happen there at night."},
+          {who:'shopkeeper', text:t('dlg_shop_repeat')},
         ];
         storyFlags.talkedShop = true;
         checkTownDone();
         return [
-          {who:'hikaru', text:"Excuse me, have you seen a boy with green hair around here recently?"},
-          {who:'shopkeeper', text:"Green hair? Oh my... yes, I think I saw someone like that."},
-          {who:'shopkeeper', text:"It was late at night, about three days ago. He was heading toward the old forest path."},
-          {who:'hikaru', text:"The old forest! That's what Kenji mentioned too!"},
-          {who:'shopkeeper', text:"You're not thinking of going there, are you? That place gives me the creeps."},
-          {who:'shopkeeper', text:"People say they hear strange sounds coming from deep in those woods..."},
-          {who:'hikaru', text:"We have to find our friend. Thank you for the information!"},
+          {who:'hikaru', text:t('dlg_hikaru_s1')},
+          {who:'shopkeeper', text:t('dlg_shop_1')},
+          {who:'shopkeeper', text:t('dlg_shop_2')},
+          {who:'hikaru', text:t('dlg_hikaru_s2')},
+          {who:'shopkeeper', text:t('dlg_shop_3')},
+          {who:'shopkeeper', text:t('dlg_shop_4')},
+          {who:'hikaru', text:t('dlg_hikaru_s3')},
         ];
       }
     },
@@ -250,38 +359,38 @@ MAPS.forest = {
     { id:'backpack', x:20*TILE, y:12*TILE, char:null, isObject:true, sprite:'backpack',
       dialogue: () => {
         if (storyFlags.foundBackpack) return [
-          {who:null, text:"Glen's backpack... He was definitely here."},
+          {who:null, text:t('dlg_backpack_repeat')},
         ];
         storyFlags.foundBackpack = true;
-        objective = 'Find the source of the strange light';
+        objective = t('obj_find_light');
         return [
-          {who:null, text:"You found a backpack on the ground."},
-          {who:'hikaru', text:"Wait... this is Glen's backpack!"},
-          {who:'rina', text:"Oh no... He was here. But where did he go?"},
-          {who:'kenji', text:"Look, there's a faint trail leading deeper into the forest..."},
-          {who:'hikaru', text:"And... do you see that? There's a strange light coming from further in."},
-          {who:'rina', text:"I don't see anything..."},
-          {who:'hikaru', text:"(Am I the only one who can see it? Something feels very wrong...)"},
+          {who:null, text:t('dlg_backpack_1')},
+          {who:'hikaru', text:t('dlg_hikaru_b1')},
+          {who:'rina', text:t('dlg_rina_b1')},
+          {who:'kenji', text:t('dlg_kenji_b1')},
+          {who:'hikaru', text:t('dlg_hikaru_b2')},
+          {who:'rina', text:t('dlg_rina_b2')},
+          {who:'hikaru', text:t('dlg_hikaru_b3')},
         ];
       }
     },
     { id:'portal', x:30*TILE, y:5*TILE, char:null, isObject:true, sprite:'portal',
       dialogue: () => {
         if (!storyFlags.foundBackpack) return [
-          {who:'hikaru', text:"There's something strange about this area... Let me look around more first."},
+          {who:'hikaru', text:t('dlg_portal_not_ready')},
         ];
         storyFlags.reachedPortal = true;
         return [
-          {who:null, text:"A swirling void of purple energy pulses before you."},
-          {who:'hikaru', text:"What... what is this?!"},
-          {who:'rina', text:"Hikaru, what are you staring at? I just see old trees..."},
-          {who:'kenji', text:"Yeah man, there's nothing there."},
-          {who:'hikaru', text:"You can't see it?! There's a massive portal right here!"},
-          {who:'hikaru', text:"Glen must have gone through here. I... I can feel it."},
-          {who:'rina', text:"Hikaru, you're scaring me..."},
-          {who:'hikaru', text:"I'm going in. Glen needs our help."},
-          {who:'kenji', text:"If you're going, we're going with you. We're not leaving anyone behind."},
-          {who:null, text:"The three of you step forward into the unknown..."},
+          {who:null, text:t('dlg_portal_1')},
+          {who:'hikaru', text:t('dlg_hikaru_p1')},
+          {who:'rina', text:t('dlg_rina_p1')},
+          {who:'kenji', text:t('dlg_kenji_p1')},
+          {who:'hikaru', text:t('dlg_hikaru_p2')},
+          {who:'hikaru', text:t('dlg_hikaru_p3')},
+          {who:'rina', text:t('dlg_rina_p2')},
+          {who:'hikaru', text:t('dlg_hikaru_p4')},
+          {who:'kenji', text:t('dlg_kenji_p2')},
+          {who:null, text:t('dlg_portal_2')},
           {who:null, text:"__ENDING__"},
         ];
       }
@@ -298,13 +407,13 @@ MAPS.forest = {
 function checkAllTalked() {
   if (storyFlags.talkedRina && storyFlags.talkedKenji) {
     storyFlags.canGoTown = true;
-    objective = 'Head east to the town center →';
+    objective = t('obj_go_town');
   }
 }
 function checkTownDone() {
   if (storyFlags.talkedOfficer && storyFlags.talkedShop) {
     storyFlags.canGoForest = true;
-    objective = 'Follow the clue to the old forest →';
+    objective = t('obj_go_forest');
   }
 }
 
@@ -1073,7 +1182,8 @@ function drawDialogue() {
   if (currentSpeaker && char) {
     ctx.fillStyle = char.hair;
     ctx.font = 'bold 15px "Segoe UI", sans-serif';
-    ctx.fillText(char.name, textX, boxY + 22);
+    const displayName = currentSpeaker === 'officer' ? t('name_officer') : currentSpeaker === 'shopkeeper' ? t('name_shopkeeper') : char.name;
+    ctx.fillText(displayName, textX, boxY + 22);
   } else if (!currentSpeaker) {
     ctx.fillStyle = '#aaa';
     ctx.font = 'italic 14px "Segoe UI", sans-serif';
@@ -1116,21 +1226,27 @@ function wrapText(text, x, y, maxWidth, lineHeight) {
 // ── UI ──
 function drawUI() {
   // Objective bar
+  ctx.font = 'bold 11px "Segoe UI", sans-serif';
+  const objLabel = t('ui_objective');
+  const objLabelWidth = ctx.measureText(objLabel).width;
+  ctx.font = '12px "Segoe UI", sans-serif';
+  const objTextWidth = ctx.measureText(objective).width;
+  const objBarW = Math.min(W - 20, objLabelWidth + objTextWidth + 40);
   ctx.fillStyle = 'rgba(10,5,30,0.7)';
   ctx.beginPath();
-  ctx.roundRect(10, 10, Math.min(W - 20, 340), 36, 8);
+  ctx.roundRect(10, 10, objBarW, 36, 8);
   ctx.fill();
   ctx.strokeStyle = 'rgba(150,120,255,0.4)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.roundRect(10, 10, Math.min(W - 20, 340), 36, 8);
+  ctx.roundRect(10, 10, objBarW, 36, 8);
   ctx.stroke();
   ctx.fillStyle = '#c8b8ff';
   ctx.font = 'bold 11px "Segoe UI", sans-serif';
-  ctx.fillText('OBJECTIVE', 20, 26);
+  ctx.fillText(objLabel, 20, 26);
   ctx.fillStyle = '#eee';
   ctx.font = '12px "Segoe UI", sans-serif';
-  ctx.fillText(objective, 95, 26);
+  ctx.fillText(objective, 20 + objLabelWidth + 10, 26);
 
   // Action button hint
   if (nearbyInteractable()) {
@@ -1147,7 +1263,7 @@ function drawUI() {
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Talk', bx + 25, by + 30);
+    ctx.fillText(t('ui_talk'), bx + 25, by + 30);
     ctx.textAlign = 'start';
   }
 
@@ -1220,9 +1336,9 @@ function update(dt) {
       initParticles(MAPS[currentMap].particles);
       transitionAlpha = 1;
       // Set objective for new map
-      if (currentMap === 'town' && !storyFlags.talkedOfficer) objective = 'Investigate the town for clues';
-      if (currentMap === 'forest') objective = 'Search the forest for Glen';
-      if (currentMap === 'neighborhood' && storyFlags.canGoTown) objective = 'Head east to the town center →';
+      if (currentMap === 'town' && !storyFlags.talkedOfficer) objective = t('obj_investigate_town');
+      if (currentMap === 'forest') objective = t('obj_search_forest');
+      if (currentMap === 'neighborhood' && storyFlags.canGoTown) objective = t('obj_go_town');
     }
     if (transitionAlpha >= 1) {
       // Fade back in
@@ -1428,11 +1544,11 @@ function drawTitle() {
   ctx.fillRect(0, 0, W, H);
 
   // Stars
-  const t = Date.now() * 0.001;
+  const tt = Date.now() * 0.001;
   for (let i = 0; i < 50; i++) {
     const sx = ((i * 137.5) % W);
     const sy = ((i * 97.3 + i * i * 3.7) % (H * 0.6));
-    const alpha = 0.3 + Math.sin(t + i * 0.5) * 0.3;
+    const alpha = 0.3 + Math.sin(tt + i * 0.5) * 0.3;
     ctx.fillStyle = `rgba(255,255,255,${alpha})`;
     ctx.beginPath();
     ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
@@ -1441,25 +1557,25 @@ function drawTitle() {
 
   // Portal glow
   const glowY = H * 0.35;
-  ctx.fillStyle = `rgba(100,40,200,${0.15 + Math.sin(t * 2) * 0.05})`;
+  ctx.fillStyle = `rgba(100,40,200,${0.15 + Math.sin(tt * 2) * 0.05})`;
   ctx.beginPath();
-  ctx.arc(W/2, glowY, 100 + Math.sin(t) * 10, 0, Math.PI * 2);
+  ctx.arc(W/2, glowY, 100 + Math.sin(tt) * 10, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = `rgba(160,80,255,${0.1 + Math.sin(t * 1.5) * 0.05})`;
+  ctx.fillStyle = `rgba(160,80,255,${0.1 + Math.sin(tt * 1.5) * 0.05})`;
   ctx.beginPath();
-  ctx.arc(W/2, glowY, 60 + Math.sin(t * 1.3) * 5, 0, Math.PI * 2);
+  ctx.arc(W/2, glowY, 60 + Math.sin(tt * 1.3) * 5, 0, Math.PI * 2);
   ctx.fill();
 
   // Title
   ctx.textAlign = 'center';
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 42px "Segoe UI", "Helvetica Neue", sans-serif';
-  ctx.fillText('UNDERDARK', W/2, H * 0.38);
+  ctx.fillText(t('title_name'), W/2, H * 0.38);
 
   // Subtitle
   ctx.fillStyle = '#c8b8ff';
   ctx.font = '18px "Segoe UI", sans-serif';
-  ctx.fillText('Act 1: The Disappearance', W/2, H * 0.45);
+  ctx.fillText(t('title_subtitle'), W/2, H * 0.45);
 
   // Characters silhouettes
   const chars = [CHARS.hikaru, CHARS.rina, CHARS.kenji];
@@ -1470,15 +1586,39 @@ function drawTitle() {
   }
 
   // Tap to start
-  const startAlpha = 0.5 + Math.sin(t * 3) * 0.3;
+  const startAlpha = 0.5 + Math.sin(tt * 3) * 0.3;
   ctx.fillStyle = `rgba(200,180,255,${startAlpha})`;
   ctx.font = '16px "Segoe UI", sans-serif';
-  ctx.fillText('Tap to Start', W/2, H * 0.78);
+  ctx.fillText(t('title_tap'), W/2, H * 0.78);
 
   // Credits
   ctx.fillStyle = 'rgba(150,130,200,0.5)';
   ctx.font = '11px "Segoe UI", sans-serif';
-  ctx.fillText('A School Project', W/2, H * 0.92);
+  ctx.fillText(t('title_credit'), W/2, H * 0.92);
+
+  // Language selector
+  const btnW = 44, btnH = 28, gap = 8;
+  const totalW = btnW * 2 + gap;
+  const lx = W/2 - totalW/2, ly = 14;
+  const langs = ['en', 'ru'];
+  const labels = ['EN', 'RU'];
+  for (let i = 0; i < 2; i++) {
+    const bx = lx + i * (btnW + gap);
+    const selected = lang === langs[i];
+    ctx.fillStyle = selected ? 'rgba(160,100,255,0.7)' : 'rgba(60,40,100,0.5)';
+    ctx.beginPath();
+    ctx.roundRect(bx, ly, btnW, btnH, 6);
+    ctx.fill();
+    ctx.strokeStyle = selected ? 'rgba(200,160,255,0.9)' : 'rgba(120,100,180,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(bx, ly, btnW, btnH, 6);
+    ctx.stroke();
+    ctx.fillStyle = selected ? '#fff' : 'rgba(200,180,255,0.6)';
+    ctx.font = 'bold 13px "Segoe UI", sans-serif';
+    ctx.fillText(labels[i], bx + btnW/2, ly + btnH/2 + 5);
+  }
+
   ctx.textAlign = 'start';
 }
 
@@ -1494,13 +1634,13 @@ function drawEnding() {
   ctx.fillRect(0, 0, W, H);
 
   // Portal effect
-  const t = Date.now() * 0.002;
+  const tt = Date.now() * 0.002;
   for (let i = 0; i < 8; i++) {
-    const a = t + i * Math.PI / 4;
-    const r = 60 + Math.sin(t + i) * 20;
-    ctx.fillStyle = `rgba(160,80,255,${0.1 + Math.sin(t + i * 0.5) * 0.05})`;
+    const a = tt + i * Math.PI / 4;
+    const r = 60 + Math.sin(tt + i) * 20;
+    ctx.fillStyle = `rgba(160,80,255,${0.1 + Math.sin(tt + i * 0.5) * 0.05})`;
     ctx.beginPath();
-    ctx.arc(W/2 + Math.cos(a) * r, H * 0.3 + Math.sin(a) * r * 0.6, 30 + Math.sin(t * 2 + i) * 10, 0, Math.PI * 2);
+    ctx.arc(W/2 + Math.cos(a) * r, H * 0.3 + Math.sin(a) * r * 0.6, 30 + Math.sin(tt * 2 + i) * 10, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -1510,15 +1650,15 @@ function drawEnding() {
     const alpha = Math.min((progress - 0.1) * 3, 1);
     ctx.fillStyle = `rgba(255,255,255,${alpha})`;
     ctx.font = 'bold 28px "Segoe UI", sans-serif';
-    ctx.fillText('The Underdark awaits...', W/2, H * 0.35);
+    ctx.fillText(t('end_awaits'), W/2, H * 0.35);
   }
 
   if (progress > 0.35) {
     const alpha = Math.min((progress - 0.35) * 3, 1);
     ctx.fillStyle = `rgba(200,180,255,${alpha})`;
     ctx.font = '16px "Segoe UI", sans-serif';
-    ctx.fillText('Three friends step into the unknown', W/2, H * 0.45);
-    ctx.fillText('to save the one they lost.', W/2, H * 0.50);
+    ctx.fillText(t('end_line1'), W/2, H * 0.45);
+    ctx.fillText(t('end_line2'), W/2, H * 0.50);
   }
 
   if (progress > 0.55) {
@@ -1537,10 +1677,10 @@ function drawEnding() {
     const alpha = Math.min((progress - 0.75) * 3, 1);
     ctx.fillStyle = `rgba(255,200,100,${alpha})`;
     ctx.font = 'bold 22px "Segoe UI", sans-serif';
-    ctx.fillText('End of Act 1', W/2, H * 0.80);
+    ctx.fillText(t('end_act'), W/2, H * 0.80);
     ctx.fillStyle = `rgba(200,180,255,${alpha * 0.7})`;
     ctx.font = '14px "Segoe UI", sans-serif';
-    ctx.fillText('To be continued...', W/2, H * 0.86);
+    ctx.fillText(t('end_cont'), W/2, H * 0.86);
   }
 
   ctx.textAlign = 'start';
@@ -1551,6 +1691,7 @@ function init() {
   player.x = 5 * TILE;
   player.y = 8 * TILE;
   currentMap = 'neighborhood';
+  objective = t('obj_talk_friends');
   initParticles(MAPS[currentMap].particles);
   requestAnimationFrame(gameLoop);
 }
