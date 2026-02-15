@@ -62,83 +62,83 @@ const CHARS = {
 };
 
 // ── LANGUAGE ──
-let lang = localStorage.getItem('underdark-lang') || 'en';
+let lang = localStorage.getItem('underdark-lang') || 'tr';
 const STRINGS = {
   // UI
-  ui_objective:  { en:'OBJECTIVE', ru:'ЦЕЛЬ' },
-  ui_talk:       { en:'Talk', ru:'Говорить' },
+  ui_objective:  { en:'OBJECTIVE', ru:'ЦЕЛЬ', tr:'HEDEF' },
+  ui_talk:       { en:'Talk', ru:'Говорить', tr:'Konuş' },
   // Objectives
-  obj_talk_friends: { en:'Talk to your friends', ru:'Поговори с друзьями' },
-  obj_go_town:      { en:'Head east to the town center →', ru:'Иди на восток к центру города →' },
-  obj_go_forest:    { en:'Follow the clue to the old forest →', ru:'Следуй за уликой к старому лесу →' },
-  obj_find_light:   { en:'Find the source of the strange light', ru:'Найди источник странного света' },
-  obj_investigate_town: { en:'Investigate the town for clues', ru:'Ищи улики в городе' },
-  obj_search_forest:    { en:'Search the forest for Glen', ru:'Ищи Глена в лесу' },
+  obj_talk_friends:     { en:'Talk to your friends', ru:'Поговори с друзьями', tr:'Arkadaşlarınla konuş' },
+  obj_go_town:          { en:'Head east to the town center →', ru:'Иди на восток к центру города →', tr:'Şehir merkezine doğuya git →' },
+  obj_go_forest:        { en:'Follow the clue to the old forest →', ru:'Следуй за уликой к старому лесу →', tr:'İpucunu takip et, eski ormana git →' },
+  obj_find_light:       { en:'Find the source of the strange light', ru:'Найди источник странного света', tr:'Garip ışığın kaynağını bul' },
+  obj_investigate_town: { en:'Investigate the town for clues', ru:'Ищи улики в городе', tr:'Şehirde ipucu ara' },
+  obj_search_forest:    { en:'Search the forest for Glen', ru:'Ищи Глена в лесу', tr:'Ormanda Glen\'i ara' },
   // Title screen
-  title_name:     { en:'UNDERDARK', ru:'UNDERDARK' },
-  title_subtitle: { en:'Act 1: The Disappearance', ru:'Акт 1: Исчезновение' },
-  title_tap:      { en:'Tap to Start', ru:'Нажми, чтобы начать' },
-  title_credit:   { en:'A School Project', ru:'Школьный проект' },
+  title_name:     { en:'UNDERDARK', ru:'UNDERDARK', tr:'UNDERDARK' },
+  title_subtitle: { en:'Act 1: The Disappearance', ru:'Акт 1: Исчезновение', tr:'Perde 1: Kaybolma' },
+  title_tap:      { en:'Tap to Start', ru:'Нажми, чтобы начать', tr:'Başlamak için dokun' },
+  title_credit:   { en:'A School Project', ru:'Школьный проект', tr:'Bir Okul Projesi' },
   // Ending screen
-  end_awaits: { en:'The Underdark awaits...', ru:'Андердарк ждёт...' },
-  end_line1:  { en:'Three friends step into the unknown', ru:'Трое друзей шагают в неизвестность' },
-  end_line2:  { en:'to save the one they lost.', ru:'чтобы спасти того, кого потеряли.' },
-  end_act:    { en:'End of Act 1', ru:'Конец 1 Акта' },
-  end_cont:   { en:'To be continued...', ru:'Продолжение следует...' },
+  end_awaits: { en:'The Underdark awaits...', ru:'Андердарк ждёт...', tr:'Underdark bekliyor...' },
+  end_line1:  { en:'Three friends step into the unknown', ru:'Трое друзей шагают в неизвестность', tr:'Üç arkadaş bilinmeze adım atıyor' },
+  end_line2:  { en:'to save the one they lost.', ru:'чтобы спасти того, кого потеряли.', tr:'kaybettikleri kişiyi kurtarmak için.' },
+  end_act:    { en:'End of Act 1', ru:'Конец 1 Акта', tr:'1. Perde Sonu' },
+  end_cont:   { en:'To be continued...', ru:'Продолжение следует...', tr:'Devamı gelecek...' },
   // Character names
-  name_officer:    { en:'Officer Tanaka', ru:'Офицер Танака' },
-  name_shopkeeper: { en:'Mrs. Yamada', ru:'Госпожа Ямада' },
+  name_officer:    { en:'Officer Tanaka', ru:'Офицер Танака', tr:'Memur Tanaka' },
+  name_shopkeeper: { en:'Mrs. Yamada', ru:'Госпожа Ямада', tr:'Bayan Yamada' },
   // Dialogue — Neighborhood: Rina
-  dlg_rina_repeat:  { en:"We should check the town center. Maybe someone saw Glen.", ru:"Нам нужно проверить центр города. Может, кто-то видел Глена." },
-  dlg_rina_1:       { en:"Hikaru! Have you heard? Glen has been missing for three days now...", ru:"Хикару! Ты слышал? Глен пропал уже три дня назад..." },
-  dlg_hikaru_r1:    { en:"I know. The police said they couldn't find any traces.", ru:"Я знаю. Полиция сказала, что не нашла никаких следов." },
-  dlg_rina_2:       { en:"They barely even tried! We have to do something ourselves.", ru:"Они даже толком не пытались! Мы должны сами что-то сделать." },
-  dlg_hikaru_r2:    { en:"You're right. Let's gather the group and investigate.", ru:"Ты права. Давай соберём группу и расследуем." },
+  dlg_rina_repeat:  { en:"We should check the town center. Maybe someone saw Glen.", ru:"Нам нужно проверить центр города. Может, кто-то видел Глена.", tr:"Şehir merkezine bakmalıyız. Belki birisi Glen'i görmüştür." },
+  dlg_rina_1:       { en:"Hikaru! Have you heard? Glen has been missing for three days now...", ru:"Хикару! Ты слышал? Глен пропал уже три дня назад...", tr:"Hikaru! Duydun mu? Glen üç gündür kayıp..." },
+  dlg_hikaru_r1:    { en:"I know. The police said they couldn't find any traces.", ru:"Я знаю. Полиция сказала, что не нашла никаких следов.", tr:"Biliyorum. Polis hiçbir iz bulamadıklarını söyledi." },
+  dlg_rina_2:       { en:"They barely even tried! We have to do something ourselves.", ru:"Они даже толком не пытались! Мы должны сами что-то сделать.", tr:"Neredeyse hiç denemediler bile! Biz kendimiz bir şeyler yapmalıyız." },
+  dlg_hikaru_r2:    { en:"You're right. Let's gather the group and investigate.", ru:"Ты права. Давай соберём группу и расследуем.", tr:"Haklısın. Grubu toplayıp araştıralım." },
   // Dialogue — Neighborhood: Kenji
-  dlg_kenji_repeat: { en:"I'll check around here some more. You guys go to town.", ru:"Я ещё поищу тут. А вы идите в город." },
-  dlg_kenji_1:      { en:"Yo, Hikaru. This is messed up. Glen wouldn't just vanish like that.", ru:"Йо, Хикару. Это ненормально. Глен не мог просто так исчезнуть." },
-  dlg_hikaru_k1:    { en:"Did he say anything to you before he disappeared?", ru:"Он тебе что-нибудь говорил перед тем, как исчез?" },
-  dlg_kenji_2:      { en:"Last thing he told me was he found some 'interesting place' near the old forest...", ru:"Последнее, что он мне сказал — он нашёл какое-то «интересное место» у старого леса..." },
-  dlg_kenji_3:      { en:"I didn't think much of it then. But now...", ru:"Тогда я не придал этому значения. Но сейчас..." },
-  dlg_hikaru_k2:    { en:"The old forest? That's worth investigating.", ru:"Старый лес? Стоит это расследовать." },
+  dlg_kenji_repeat: { en:"I'll check around here some more. You guys go to town.", ru:"Я ещё поищу тут. А вы идите в город.", tr:"Ben buralarda biraz daha bakacağım. Siz şehre gidin." },
+  dlg_kenji_1:      { en:"Yo, Hikaru. This is messed up. Glen wouldn't just vanish like that.", ru:"Йо, Хикару. Это ненормально. Глен не мог просто так исчезнуть.", tr:"Hey, Hikaru. Bu çok saçma. Glen öylece ortadan kaybolmazdı." },
+  dlg_hikaru_k1:    { en:"Did he say anything to you before he disappeared?", ru:"Он тебе что-нибудь говорил перед тем, как исчез?", tr:"Kaybolmadan önce sana bir şey söyledi mi?" },
+  dlg_kenji_2:      { en:"Last thing he told me was he found some 'interesting place' near the old forest...", ru:"Последнее, что он мне сказал — он нашёл какое-то «интересное место» у старого леса...", tr:"Bana söylediği son şey eski ormanın yakınında 'ilginç bir yer' bulduğuydu..." },
+  dlg_kenji_3:      { en:"I didn't think much of it then. But now...", ru:"Тогда я не придал этому значения. Но сейчас...", tr:"O zaman pek üzerinde durmadım. Ama şimdi..." },
+  dlg_hikaru_k2:    { en:"The old forest? That's worth investigating.", ru:"Старый лес? Стоит это расследовать.", tr:"Eski orman mı? Araştırmaya değer." },
   // Dialogue — Town: Officer
-  dlg_officer_repeat: { en:"I already told you, we've done everything we can. Go home, kids.", ru:"Я уже сказал, мы сделали всё, что могли. Идите домой, ребята." },
-  dlg_hikaru_o1:      { en:"Officer, about our friend Glen who went missing...", ru:"Офицер, насчёт нашего друга Глена, который пропал..." },
-  dlg_officer_1:      { en:"Ah, the Tanaka boy. Look, we searched the area thoroughly.", ru:"А, мальчик Танака. Послушайте, мы тщательно обыскали район." },
-  dlg_officer_2:      { en:"No signs of foul play. He probably just ran away from home. It happens.", ru:"Никаких признаков преступления. Скорее всего, он просто сбежал из дома. Такое бывает." },
-  dlg_rina_o1:        { en:"That's not like Glen at all! He wouldn't just leave!", ru:"Это совсем не похоже на Глена! Он бы просто так не ушёл!" },
-  dlg_officer_3:      { en:"I understand your concern, but there's nothing more we can do.", ru:"Я понимаю вашу обеспокоенность, но мы больше ничего не можем сделать." },
-  dlg_hikaru_o2:      { en:"(The police are useless... We'll have to find him ourselves.)", ru:"(Полиция бесполезна... Придётся искать его самим.)" },
+  dlg_officer_repeat: { en:"I already told you, we've done everything we can. Go home, kids.", ru:"Я уже сказал, мы сделали всё, что могли. Идите домой, ребята.", tr:"Size zaten söyledim, elimizden gelen her şeyi yaptık. Eve gidin çocuklar." },
+  dlg_hikaru_o1:      { en:"Officer, about our friend Glen who went missing...", ru:"Офицер, насчёт нашего друга Глена, который пропал...", tr:"Memur bey, kaybolan arkadaşımız Glen hakkında..." },
+  dlg_officer_1:      { en:"Ah, the Tanaka boy. Look, we searched the area thoroughly.", ru:"А, мальчик Танака. Послушайте, мы тщательно обыскали район.", tr:"Ah, Tanaka çocuğu. Bakın, bölgeyi baştan sona aradık." },
+  dlg_officer_2:      { en:"No signs of foul play. He probably just ran away from home. It happens.", ru:"Никаких признаков преступления. Скорее всего, он просто сбежал из дома. Такое бывает.", tr:"Suç belirtisi yok. Muhtemelen evden kaçmıştır. Olur böyle şeyler." },
+  dlg_rina_o1:        { en:"That's not like Glen at all! He wouldn't just leave!", ru:"Это совсем не похоже на Глена! Он бы просто так не ушёл!", tr:"Bu Glen'e hiç benzemiyor! Öylece gitmezdi!" },
+  dlg_officer_3:      { en:"I understand your concern, but there's nothing more we can do.", ru:"Я понимаю вашу обеспокоенность, но мы больше ничего не можем сделать.", tr:"Endişenizi anlıyorum ama yapabileceğimiz başka bir şey yok." },
+  dlg_hikaru_o2:      { en:"(The police are useless... We'll have to find him ourselves.)", ru:"(Полиция бесполезна... Придётся искать его самим.)", tr:"(Polisin hiç faydası yok... Onu kendimiz bulmalıyız.)" },
   // Dialogue — Town: Shopkeeper
-  dlg_shop_repeat:    { en:"Please be careful near that forest. Strange things happen there at night.", ru:"Пожалуйста, будьте осторожны рядом с тем лесом. Там по ночам происходят странные вещи." },
-  dlg_hikaru_s1:      { en:"Excuse me, have you seen a boy with green hair around here recently?", ru:"Простите, вы не видели тут недавно мальчика с зелёными волосами?" },
-  dlg_shop_1:         { en:"Green hair? Oh my... yes, I think I saw someone like that.", ru:"Зелёные волосы? О боже... да, кажется, я видела кого-то такого." },
-  dlg_shop_2:         { en:"It was late at night, about three days ago. He was heading toward the old forest path.", ru:"Это было поздно ночью, примерно три дня назад. Он шёл по тропинке к старому лесу." },
-  dlg_hikaru_s2:      { en:"The old forest! That's what Kenji mentioned too!", ru:"Старый лес! Кэндзи тоже об этом говорил!" },
-  dlg_shop_3:         { en:"You're not thinking of going there, are you? That place gives me the creeps.", ru:"Вы же не собираетесь туда идти? Это место вселяет в меня жуть." },
-  dlg_shop_4:         { en:"People say they hear strange sounds coming from deep in those woods...", ru:"Люди говорят, что слышат странные звуки из глубины тех лесов..." },
-  dlg_hikaru_s3:      { en:"We have to find our friend. Thank you for the information!", ru:"Мы должны найти нашего друга. Спасибо за информацию!" },
+  dlg_shop_repeat:    { en:"Please be careful near that forest. Strange things happen there at night.", ru:"Пожалуйста, будьте осторожны рядом с тем лесом. Там по ночам происходят странные вещи.", tr:"Lütfen o ormanın yakınında dikkatli olun. Geceleri orada garip şeyler oluyor." },
+  dlg_hikaru_s1:      { en:"Excuse me, have you seen a boy with green hair around here recently?", ru:"Простите, вы не видели тут недавно мальчика с зелёными волосами?", tr:"Affedersiniz, son zamanlarda buralarda yeşil saçlı bir çocuk gördünüz mü?" },
+  dlg_shop_1:         { en:"Green hair? Oh my... yes, I think I saw someone like that.", ru:"Зелёные волосы? О боже... да, кажется, я видела кого-то такого.", tr:"Yeşil saçlı mı? Aman... evet, öyle birini gördüm sanırım." },
+  dlg_shop_2:         { en:"It was late at night, about three days ago. He was heading toward the old forest path.", ru:"Это было поздно ночью, примерно три дня назад. Он шёл по тропинке к старому лесу.", tr:"Gece geç saatlerdi, yaklaşık üç gün önce. Eski orman yoluna doğru gidiyordu." },
+  dlg_hikaru_s2:      { en:"The old forest! That's what Kenji mentioned too!", ru:"Старый лес! Кэндзи тоже об этом говорил!", tr:"Eski orman! Kenji de bundan bahsetmişti!" },
+  dlg_shop_3:         { en:"You're not thinking of going there, are you? That place gives me the creeps.", ru:"Вы же не собираетесь туда идти? Это место вселяет в меня жуть.", tr:"Oraya gitmeyi düşünmüyorsunuz, değil mi? Orası beni çok ürpertiyor." },
+  dlg_shop_4:         { en:"People say they hear strange sounds coming from deep in those woods...", ru:"Люди говорят, что слышат странные звуки из глубины тех лесов...", tr:"İnsanlar o ormanın derinliklerinden garip sesler duyduklarını söylüyor..." },
+  dlg_hikaru_s3:      { en:"We have to find our friend. Thank you for the information!", ru:"Мы должны найти нашего друга. Спасибо за информацию!", tr:"Arkadaşımızı bulmalıyız. Bilgi için teşekkürler!" },
   // Dialogue — Forest: Backpack
-  dlg_backpack_repeat:   { en:"Glen's backpack... He was definitely here.", ru:"Рюкзак Глена... Он точно был здесь." },
-  dlg_backpack_1:        { en:"You found a backpack on the ground.", ru:"Вы нашли рюкзак на земле." },
-  dlg_hikaru_b1:         { en:"Wait... this is Glen's backpack!", ru:"Подожди... это рюкзак Глена!" },
-  dlg_rina_b1:           { en:"Oh no... He was here. But where did he go?", ru:"О нет... Он был здесь. Но куда он делся?" },
-  dlg_kenji_b1:          { en:"Look, there's a faint trail leading deeper into the forest...", ru:"Смотрите, здесь слабый след, ведущий глубже в лес..." },
-  dlg_hikaru_b2:         { en:"And... do you see that? There's a strange light coming from further in.", ru:"И... вы это видите? Оттуда, из глубины, идёт странный свет." },
-  dlg_rina_b2:           { en:"I don't see anything...", ru:"Я ничего не вижу..." },
-  dlg_hikaru_b3:         { en:"(Am I the only one who can see it? Something feels very wrong...)", ru:"(Неужели только я это вижу? Что-то здесь очень не так...)" },
+  dlg_backpack_repeat:   { en:"Glen's backpack... He was definitely here.", ru:"Рюкзак Глена... Он точно был здесь.", tr:"Glen'in sırt çantası... Kesinlikle buradaymış." },
+  dlg_backpack_1:        { en:"You found a backpack on the ground.", ru:"Вы нашли рюкзак на земле.", tr:"Yerde bir sırt çantası buldunuz." },
+  dlg_hikaru_b1:         { en:"Wait... this is Glen's backpack!", ru:"Подожди... это рюкзак Глена!", tr:"Dur... bu Glen'in sırt çantası!" },
+  dlg_rina_b1:           { en:"Oh no... He was here. But where did he go?", ru:"О нет... Он был здесь. Но куда он делся?", tr:"Hayır... Buradaymış. Ama nereye gitti?" },
+  dlg_kenji_b1:          { en:"Look, there's a faint trail leading deeper into the forest...", ru:"Смотрите, здесь слабый след, ведущий глубже в лес...", tr:"Bakın, ormanın derinliklerine doğru giden belirsiz bir iz var..." },
+  dlg_hikaru_b2:         { en:"And... do you see that? There's a strange light coming from further in.", ru:"И... вы это видите? Оттуда, из глубины, идёт странный свет.", tr:"Ve... şunu görüyor musunuz? İleriden garip bir ışık geliyor." },
+  dlg_rina_b2:           { en:"I don't see anything...", ru:"Я ничего не вижу...", tr:"Ben hiçbir şey görmüyorum..." },
+  dlg_hikaru_b3:         { en:"(Am I the only one who can see it? Something feels very wrong...)", ru:"(Неужели только я это вижу? Что-то здесь очень не так...)", tr:"(Bunu sadece ben mi görüyorum? Bir şeyler çok yanlış...)" },
   // Dialogue — Forest: Portal
-  dlg_portal_not_ready:  { en:"There's something strange about this area... Let me look around more first.", ru:"В этом месте что-то странное... Давай сначала осмотримся получше." },
-  dlg_portal_1:          { en:"A swirling void of purple energy pulses before you.", ru:"Перед вами пульсирует вихрь фиолетовой энергии." },
-  dlg_hikaru_p1:         { en:"What... what is this?!", ru:"Что... что это?!" },
-  dlg_rina_p1:           { en:"Hikaru, what are you staring at? I just see old trees...", ru:"Хикару, на что ты смотришь? Я вижу только старые деревья..." },
-  dlg_kenji_p1:          { en:"Yeah man, there's nothing there.", ru:"Да, чувак, там ничего нет." },
-  dlg_hikaru_p2:         { en:"You can't see it?! There's a massive portal right here!", ru:"Вы не видите?! Тут огромный портал!" },
-  dlg_hikaru_p3:         { en:"Glen must have gone through here. I... I can feel it.", ru:"Глен, должно быть, прошёл сюда. Я... я чувствую это." },
-  dlg_rina_p2:           { en:"Hikaru, you're scaring me...", ru:"Хикару, ты меня пугаешь..." },
-  dlg_hikaru_p4:         { en:"I'm going in. Glen needs our help.", ru:"Я иду туда. Глену нужна наша помощь." },
-  dlg_kenji_p2:          { en:"If you're going, we're going with you. We're not leaving anyone behind.", ru:"Если ты идёшь, мы идём с тобой. Мы никого не бросим." },
-  dlg_portal_2:          { en:"The three of you step forward into the unknown...", ru:"Вы втроём шагаете в неизвестность..." },
+  dlg_portal_not_ready:  { en:"There's something strange about this area... Let me look around more first.", ru:"В этом месте что-то странное... Давай сначала осмотримся получше.", tr:"Bu bölgede garip bir şey var... Önce biraz daha etrafı araştırayım." },
+  dlg_portal_1:          { en:"A swirling void of purple energy pulses before you.", ru:"Перед вами пульсирует вихрь фиолетовой энергии.", tr:"Önünüzde dönen mor bir enerji girdabı atıyor." },
+  dlg_hikaru_p1:         { en:"What... what is this?!", ru:"Что... что это?!", tr:"Bu... bu ne?!" },
+  dlg_rina_p1:           { en:"Hikaru, what are you staring at? I just see old trees...", ru:"Хикару, на что ты смотришь? Я вижу только старые деревья...", tr:"Hikaru, neye bakıyorsun? Ben sadece eski ağaçlar görüyorum..." },
+  dlg_kenji_p1:          { en:"Yeah man, there's nothing there.", ru:"Да, чувак, там ничего нет.", tr:"Evet dostum, orada hiçbir şey yok." },
+  dlg_hikaru_p2:         { en:"You can't see it?! There's a massive portal right here!", ru:"Вы не видите?! Тут огромный портал!", tr:"Göremiyorsunuz mu?! Tam burada kocaman bir portal var!" },
+  dlg_hikaru_p3:         { en:"Glen must have gone through here. I... I can feel it.", ru:"Глен, должно быть, прошёл сюда. Я... я чувствую это.", tr:"Glen buradan geçmiş olmalı. Ben... hissedebiliyorum." },
+  dlg_rina_p2:           { en:"Hikaru, you're scaring me...", ru:"Хикару, ты меня пугаешь...", tr:"Hikaru, beni korkutuyorsun..." },
+  dlg_hikaru_p4:         { en:"I'm going in. Glen needs our help.", ru:"Я иду туда. Глену нужна наша помощь.", tr:"Ben giriyorum. Glen'in yardımımıza ihtiyacı var." },
+  dlg_kenji_p2:          { en:"If you're going, we're going with you. We're not leaving anyone behind.", ru:"Если ты идёшь, мы идём с тобой. Мы никого не бросим.", tr:"Sen gidiyorsan, biz de seninle geliyoruz. Kimseyi geride bırakmayız." },
+  dlg_portal_2:          { en:"The three of you step forward into the unknown...", ru:"Вы втроём шагаете в неизвестность...", tr:"Üçünüz birlikte bilinmeze doğru adım atıyorsunuz..." },
 };
 function t(key) { return STRINGS[key][lang]; }
 
@@ -165,10 +165,10 @@ let tapAction = false;
 
 function hitLangButton(px, py) {
   const btnW = 44, btnH = 28, gap = 8;
-  const totalW = btnW * 2 + gap;
+  const totalW = btnW * 3 + gap * 2;
   const lx = W/2 - totalW/2, ly = 14;
-  const langs = ['en', 'ru'];
-  for (let i = 0; i < 2; i++) {
+  const langs = ['tr', 'en', 'ru'];
+  for (let i = 0; i < 3; i++) {
     const bx = lx + i * (btnW + gap);
     if (px >= bx && px <= bx + btnW && py >= ly && py <= ly + btnH) {
       lang = langs[i];
@@ -1598,11 +1598,11 @@ function drawTitle() {
 
   // Language selector
   const btnW = 44, btnH = 28, gap = 8;
-  const totalW = btnW * 2 + gap;
+  const totalW = btnW * 3 + gap * 2;
   const lx = W/2 - totalW/2, ly = 14;
-  const langs = ['en', 'ru'];
-  const labels = ['EN', 'RU'];
-  for (let i = 0; i < 2; i++) {
+  const langs = ['tr', 'en', 'ru'];
+  const labels = ['TR', 'EN', 'RU'];
+  for (let i = 0; i < 3; i++) {
     const bx = lx + i * (btnW + gap);
     const selected = lang === langs[i];
     ctx.fillStyle = selected ? 'rgba(160,100,255,0.7)' : 'rgba(60,40,100,0.5)';
