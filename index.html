@@ -66,7 +66,7 @@ const C = {
 // ── CHARACTERS ──
 const CHARS = {
   hikaru: { name:'Hikaru', hair:'#4488ff', hairStyle:'spiky', skin:'#fce4c8', shirt:'#fff', pants:'#334', eyes:'#2255cc' },
-  rina:   { name:'Rina',   hair:'#2a0a1a', hairStyle:'long',  skin:'#fce4c8', shirt:'#f0eff0', pants:'#1a1a2a', eyes:'#1a1a1a', ribbon:'#7bc0e8' },
+  rina:   { name:'Rina',   hair:'#2a0a1a', hairStyle:'long',  skin:'#fce4c8', shirt:'#ffffff', pants:'#1a1a2a', eyes:'#1a1a1a', ribbon:'#7bc0e8' },
   kenji:  { name:'Kenji',  hair:'#e07020', hairStyle:'messy', skin:'#f2d4b0', shirt:'#3aaa3a', pants:'#2a3a5a', eyes:'#5a3a1a', belt:true },
   glen:   { name:'Glen',   hair:'#33cc66', hairStyle:'messy', skin:'#fce4c8', shirt:'#667', pants:'#334', eyes:'#228844' },
   officer:{ name:'Officer Tanaka', hair:'#334', hairStyle:'short', skin:'#f0d0a0', shirt:'#2244aa', pants:'#223', eyes:'#332' },
@@ -1443,7 +1443,14 @@ function drawCharSprite(x, y, char, dir, frame, highlight) {
 
   // Body
   ctx.fillStyle = char.shirt;
-  ctx.fillRect(sx + 8, sy + 14 + (isMoving ? bounce * 0.3 : 0), 16, 12);
+  const bodyBounce = isMoving ? bounce * 0.3 : 0;
+  ctx.fillRect(sx + 8, sy + 14 + bodyBounce, 16, 12);
+  // Shirt outline for light shirts (makes it stand out from skin)
+  if (char.ribbon) {
+    ctx.strokeStyle = '#c0c0c0';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(sx + 8, sy + 14 + bodyBounce, 16, 12);
+  }
   // Ribbon/bow tie
   if (char.ribbon) {
     const rb = isMoving ? bounce * 0.3 : 0;
@@ -2427,7 +2434,7 @@ function drawDialogue() {
 
   // Full-body speaker figure above dialogue box (top-left)
   const speakerChar = currentSpeaker ? CHARS[currentSpeaker] : null;
-  const noPortrait = (currentSpeaker === 'officer' || currentSpeaker === 'fairy');
+  const noPortrait = (currentSpeaker === 'officer' || currentSpeaker === 'fairy' || currentSpeaker === 'glen' || currentSpeaker === 'glen_boss');
   if (speakerChar && !noPortrait) {
     const charImg = (currentSpeaker === 'kenji') ? kenjiImg : (currentSpeaker === 'hikaru') ? hikaruImg : (currentSpeaker === 'rina') ? rinaImg : (currentSpeaker === 'larry_fake') ? larryImg : (currentSpeaker === 'shopkeeper') ? shopkeeperImg : null;
     if (charImg && charImg.complete && charImg.naturalWidth > 0) {
